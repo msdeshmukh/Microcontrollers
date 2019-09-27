@@ -10,6 +10,7 @@
 
 void set_DCO(uint32_t MHz_freq) {
     CS->KEY = CS_KEY_VAL;
+    CS->KEY = 0;
     CS->CTL0 &= ~CS_CTL0_DCOTUNE_MASK;
     CS->CTL0 |= CS_CTL0_DCORSEL_MASK & MHz_freq;
     CS->KEY = 0;
