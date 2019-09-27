@@ -9,6 +9,20 @@
 #include "msp.h"
 
 void set_DCO(uint32_t MHz_freq) {
+
+    if (MHz_freq == DCORSEL_48_MHz) {
+        /* Transition to VCORE Level 1: AM0_LDO --> AM1_LDO */
+        while ((PCM->CTL1 & PCM_CTL1_PMR_BUSY));
+            PCM->CTL0 = PCM_CTL0_KEY_VAL | PCM_CTL0_AMR_1;
+        while ((PCM->CTL1 & PCM_CTL1_PMR_BUSY));
+
+        /* Configure Flash wait-state to 1 for both banks 0 & 1 */
+        FLCTL->BANK0_RDCTL = (FLCTL->BANK0_RDCTL &
+                ~(FLCTL_BANK0_RDCTL_WAIT_MASK)) | FLCTL_BANK0_RDCTL_WAIT_1;
+        FLCTL->BANK1_RDCTL = (FLCTL->BANK0_RDCTL &
+                ~(FLCTL_BANK1_RDCTL_WAIT_MASK)) | FLCTL_BANK1_RDCTL_WAIT_1;
+    }
+
     CS->KEY = CS_KEY_VAL;
     CS->CTL0 = 0;
     CS->CTL0 &= ~CS_CTL0_DCOTUNE_MASK;
@@ -22,6 +36,8 @@ void delay_us(int us_delay) {
     //P4->OUT |= BIT0;
     //P4->OUT |= ~BIT0;
     uint32_t dco_freq;
+    uint32_t scale;
+    int i;
     uint32_t dco_rsel = CS->CTL0 & CS_CTL0_DCORSEL_MASK;
     int dco_tune = (CS->CTL0 & CS_CTL0_DCOTUNE_MASK) >> CS_CTL0_DCOTUNE_OFS;
     if (dco_tune & DCOTUNE_SIGN_MASK) {
@@ -47,6 +63,17 @@ void delay_us(int us_delay) {
         dco_freq = FREQ_48_MHz + dco_tune;
         break;
     }
+
+    scale = dco_freq/FREQ_1POINT5_MHz;
+    us_delay -= FUNC_ENTER_EXIT_TIME / scale;
+    if (us_delay < 0) {
+        return;
+    }
+    uint32_t cap = (us_delay / LOOP_ITER_TIME) * scale;
+    if (cap == 0) {
+        cap = 1;
+    }
+    for (i = 0; i < cap; i++);
 }
 
 

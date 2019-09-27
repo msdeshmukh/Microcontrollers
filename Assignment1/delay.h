@@ -23,6 +23,9 @@
 #define FREQ_24_MHz 24000000u
 #define FREQ_48_MHz 48000000u
 #define DCOTUNE_SIGN_MASK 0x200
+#define LOOP_ITER_TIME 9u
+#define FUNC_ENTER_EXIT_TIME 72u
+
 
 void set_DCO(uint32_t MHz_freq);
 void delay_us(int us_delay);
