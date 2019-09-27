@@ -8,6 +8,8 @@
 #ifndef DELAY_H_
 #define DELAY_H_
 
+#include <stdint.h>
+
 #define DCO_1POINT5_MHz 0x0
 #define DCO_3_MHz 0x1
 #define DCO_6_MHz 0x2

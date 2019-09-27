@@ -7,7 +7,6 @@
 
 #include "delay.h"
 #include "msp.h"
-#include <stdint.h>
 
 void set_DCO(uint32_t MHz_freq) {
     CS->KEY = CS_KEY_VAL;
