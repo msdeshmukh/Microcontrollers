@@ -10,12 +10,12 @@
 
 #include <stdint.h>
 
-#define DCO_1POINT5_MHz 0x0
-#define DCO_3_MHz 0x1
-#define DCO_6_MHz 0x2
-#define DCO_12_MHz 0x3
-#define DCO_24_MHz 0x4
-#define DCO_48_MHz 0x5
+#define DCORSEL_1POINT5_MHz 0x0
+#define DCORSEL_3_MHz 0x1
+#define DCORSEL_6_MHz 0x2
+#define DCORSEL_12_MHz 0x3
+#define DCORSEL_24_MHz 0x4
+#define DCORSEL_48_MHz 0x5
 #define FREQ_1POINT5_MHz 1500000u
 #define FREQ_3_MHz 3000000u
 #define FREQ_6_MHz 6000000u
