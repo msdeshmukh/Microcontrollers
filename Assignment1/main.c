@@ -13,7 +13,14 @@ void main(void)
 	P4->REN &= ~BIT3;
 	P4->SEL0 |= BIT3;
 	P4->SEL1 &= ~BIT3;
+	P4->DIR |= BIT1;
+	P4->REN &= ~BIT1;
+	P4->SEL0 &= ~BIT1;
+	P4->SEL1 &= ~BIT1;
+	P4->OUT |= BIT1;
+	//delay_us(10);
 	while (1) {
-
+	    //P4->OUT |= ~BIT0;
+	    //delay_us(10);
 	}
 }

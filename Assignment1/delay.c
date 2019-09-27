@@ -10,15 +10,19 @@
 
 void set_DCO(uint32_t MHz_freq) {
     CS->KEY = CS_KEY_VAL;
-    CS->KEY = 0;
+    CS->CTL0 = 0;
     CS->CTL0 &= ~CS_CTL0_DCOTUNE_MASK;
+    CS->CTL0 &= ~CS_CTL0_DCORSEL_MASK;
     CS->CTL0 |= CS_CTL0_DCORSEL_MASK & MHz_freq;
     CS->KEY = 0;
+    return;
 }
 
 void delay_us(int us_delay) {
+    //P4->OUT |= BIT0;
+    //P4->OUT |= ~BIT0;
     uint32_t dco_freq;
-    uint32_t dco_rsel = (CS->CTL0 & CS_CTL0_DCORSEL_MASK) >> CS_CTL0_DCORSEL_OFS;
+    uint32_t dco_rsel = CS->CTL0 & CS_CTL0_DCORSEL_MASK;
     int dco_tune = (CS->CTL0 & CS_CTL0_DCOTUNE_MASK) >> CS_CTL0_DCOTUNE_OFS;
     if (dco_tune & DCOTUNE_SIGN_MASK) {
         dco_tune = -1 * (~dco_tune + 1);
