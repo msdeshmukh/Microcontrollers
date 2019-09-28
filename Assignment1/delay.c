@@ -65,16 +65,9 @@ void delay_us(int us_delay) {
     }
 
     scale = dco_freq/FREQ_1POINT5_MHz;
-    us_delay *= 1000;
-    us_delay -= FUNC_ENTER_EXIT_TIME / scale;
-    if (us_delay < 0) {
-        return;
-    }
-    uint32_t cap = (us_delay / LOOP_ITER_TIME) * scale;
-    if (cap == 0) {
-        cap = 1;
-    }
-    for (i = 0; i < cap; i += 1000);
+    i = FUNC_ENTER_EXIT_TIME / scale;
+    while(i < (us_delay * 1000))
+        i += LOOP_ITER_TIME / scale;
 }
 
 

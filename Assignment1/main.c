@@ -8,7 +8,7 @@
 void main(void)
 {
 	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;		// stop watchdog timer
-	set_DCO(DCORSEL_24_MHz);
+	set_DCO(DCORSEL_6_MHz);
 	P4->DIR |= BIT3;
 	P4->REN &= ~BIT3;
 	P4->SEL0 |= BIT3;
@@ -19,6 +19,6 @@ void main(void)
 	P4->SEL1 &= ~BIT1;
 	while (1) {
 	    P4->OUT ^= BIT1;
-	    delay_us(40);
+	    delay_us(3);
 	}
 }
