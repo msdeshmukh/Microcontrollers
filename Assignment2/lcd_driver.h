@@ -9,7 +9,6 @@
 #define LCD_DRIVER_H_
 
 #include <stdint.h>
-#include "delay.h"
 
 #define LCD_DATA P2->OUT
 #define LCD_PIN_MASK 0x7F
