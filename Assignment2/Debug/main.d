@@ -18,6 +18,7 @@ main.obj: /Applications/ti/ccs910/ccs/ccs_base/arm/include/CMSIS/cmsis_compiler.
 main.obj: /Applications/ti/ccs910/ccs/ccs_base/arm/include/CMSIS/cmsis_ccs.h
 main.obj: /Applications/ti/ccs910/ccs/ccs_base/arm/include/system_msp432p401r.h
 main.obj: ../lcd_driver.h
+main.obj: ../delay.h
 
 ../main.c: 
 /Applications/ti/ccs910/ccs/ccs_base/arm/include/msp.h: 
@@ -37,3 +38,4 @@ main.obj: ../lcd_driver.h
 /Applications/ti/ccs910/ccs/ccs_base/arm/include/CMSIS/cmsis_ccs.h: 
 /Applications/ti/ccs910/ccs/ccs_base/arm/include/system_msp432p401r.h: 
 ../lcd_driver.h: 
+../delay.h: 
