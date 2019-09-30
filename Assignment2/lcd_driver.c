@@ -23,35 +23,58 @@ void Home_LCD() {
     Write_command_LCD(RETURN_HOME);
 }
 
+void Write_string_LCD(char *str, uint32_t size) {
+    int i;
+    for (i = 0; i < size; i++) {
+        Write_char_LCD(str[i]);
+    }
+}
+
 void Write_char_LCD(char to_write) {
     static uint8_t row = 0;
     static uint8_t col = 0;
     uint8_t new_addr = 0;
+    if (to_write != '\n') {
+        LCD_CTL &= ~LCD_PIN_MASK;
+        LCD_CTL |= LCD_RS_BIT;
+        LCD_CTL |= to_write & LCD_DATA_MASK;
 
-    LCD_CTL &= ~LCD_PIN_MASK;
-    LCD_CTL |= LCD_RS_BIT;
-    LCD_CTL |= to_write & LCD_DATA_MASK;
+        LCD_CTL |= LCD_EN_BIT;
+        delay_us(2);
+        LCD_CTL &= ~LCD_EN_BIT;
 
-    LCD_CTL |= LCD_EN_BIT;
-    delay_us(2);
-    LCD_CTL &= ~LCD_EN_BIT;
+        LCD_CTL &= ~LCD_DATA_MASK;
+        LCD_CTL |= (to_write << 4) & LCD_DATA_MASK;
 
-    LCD_CTL &= ~LCD_DATA_MASK;
-    LCD_CTL |= (to_write << 4) & LCD_DATA_MASK;
+        LCD_CTL |= LCD_EN_BIT;
+        delay_us(2);
+        LCD_CTL &= ~LCD_EN_BIT;
 
-    LCD_CTL |= LCD_EN_BIT;
-    delay_us(2);
-    LCD_CTL &= ~LCD_EN_BIT;
+        delay_us(40);
+    }
 
-    delay_us(37);
-
-    if (++col > 15) {
+    if (++col > 15 || to_write == '\n') {
         col = 0;
         row ^= 0x01;
     }
 
     new_addr = DDRAM_Addr[col + (16 * row)];
 
+    LCD_CTL &= ~LCD_PIN_MASK;
+    LCD_CTL |= 0x80 | (new_addr & LCD_DATA_MASK);
+
+    LCD_CTL |= LCD_EN_BIT;
+    delay_us(2);
+    LCD_CTL &= ~LCD_EN_BIT;
+
+    LCD_CTL &= ~LCD_PIN_MASK;
+    LCD_CTL |= (new_addr << 4) & LCD_DATA_MASK;
+
+    LCD_CTL |= LCD_EN_BIT;
+    delay_us(2);
+    LCD_CTL &= ~LCD_EN_BIT;
+
+    delay_us(40);
 
 }
 

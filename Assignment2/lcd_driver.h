@@ -19,7 +19,7 @@
 
 #define WAKE_UP 0x30
 #define CLEAR_DISPLAY 0x01
-#define RETURN_HOME 0x0
+#define RETURN_HOME 0x02
 #define ENTRY_MODE_SET 0x06
 #define DISPLAY_ON 0x0F
 #define CURSOR_SHIFT 0x10
@@ -31,6 +31,7 @@ void Clear_LCD(); // clear the display
 void Home_LCD(); // move the cursor to the top left of the LCD
 void Write_char_LCD(char to_write); // write a character to the LCD
 void Write_command_LCD(uint8_t command);
+void Write_string_LCD(char *str, uint32_t size);
 void Initialize_LCD(); // run initialization commands on LCD
 
 
