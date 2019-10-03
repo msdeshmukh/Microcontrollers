@@ -15,7 +15,7 @@ int detect_key_press(void) {
     uint32_t keypad_col_select = KEYPAD_COL_0;
     KEYPAD_WRITE_REG |= KEYPAD_WRITE_MASK;
     for (row = 0; row < NUM_ROWS; row++) {
-        if (KEYPAD_READ_REG & keypad_bit_select) {
+        if (KEYPAD_READ_REG & keypad_row_select) {
             for (col = 0; col < NUM_COLS; col++) {
                 KEYPAD_WRITE_REG &= ~KEYPAD_WRITE_MASK;
                 KEYPAD_WRITE_REG |= keypad_col_select;
