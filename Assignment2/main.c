@@ -13,7 +13,7 @@ void main(void)
 	// Run initialization sequence on LCD
 	Initialize_LCD();
 
-	Write_string_LCD("Hello World\nAssignment 3", 24);
+	Write_string_LCD("Hello World\nAssignment 3", 23);
 	//Home_LCD();
 	//Clear_LCD();
 

@@ -8,7 +8,7 @@
 #include "keypad_driver.h"
 
 
-int detect_key_press(void) {
+uint8_t detect_key_press() {
     int row;
     int col;
     uint32_t keypad_row_select = KEYPAD_ROW_0;
@@ -27,7 +27,7 @@ int detect_key_press(void) {
         }
         keypad_row_select = keypad_row_select << 1;
     }
-    return -1;
+    return 255;
 }
 
 void Initialize_keypad(void) {

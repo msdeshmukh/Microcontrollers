@@ -15,12 +15,12 @@
 #define KEYPAD_READ_MASK 0x0F
 #define KEYPAD_WRITE_MASK 0x07
 #define KEYPAD_ROW_0 0x01
-#define KEYPAD_ROW_1 0x02
-#define KEYPAD_ROW_2 0x04
-#define KEYPAD_ROW_3 0x08
+#define KEYPAD_ROW_1 0x40
+#define KEYPAD_ROW_2 0x08
+#define KEYPAD_ROW_3 0x40
 #define KEYPAD_COL_0 0x01
-#define KEYPAD_COL_1 0x02
-#define KEYPAD_COL_2 0x04
+#define KEYPAD_COL_1 0x04
+#define KEYPAD_COL_2 0x02
 #define ONE 49
 #define TWO 50
 #define THREE 51
