@@ -1,4 +1,5 @@
 #include "msp.h"
+#include "delay.h"
 #include "lcd_driver.h"
 #include "keypad_driver.h"
 
@@ -9,6 +10,7 @@
 void main(void)
 {
 	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;		// stop watchdog timer
+	set_DCO(DCORSEL_24_MHz);
 	Initialize_LCD();
 	Initialize_keypad();
 	int button = -1;
@@ -60,5 +62,6 @@ void main(void)
 	        Write_char_LCD(button);
 	        Home_LCD();
 	    }
+	    delay_us(5);
 	}
 }
