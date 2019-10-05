@@ -1,8 +1,7 @@
 /*
- * keypad_driver.c
- *
+ *  keypad_driver.c
  *  Created on: Oct 1, 2019
- *      Author: ryanmyers
+ *  Authors: Mihir Deshmukh, Ryan Myers
  */
 #include "msp.h"
 #include "keypad_driver.h"

@@ -1,10 +1,8 @@
 /*
- * keypad_driver.h
- *
+ *  keypad_driver.h
  *  Created on: Oct 1, 2019
- *      Author: ryanmyers
+ *  Authors: Mihir Deshmukh, Ryan Myers
  */
-
 #ifndef KEYPAD_DRIVER_H_
 #define KEYPAD_DRIVER_H_
 

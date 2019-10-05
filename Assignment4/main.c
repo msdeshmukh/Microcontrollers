@@ -4,7 +4,9 @@
 
 
 /**
- * main.c
+ *  main.c
+ *  Created on: Oct 1, 2019
+ *  Authors: Mihir Deshmukh, Ryan Myers
  */
 void main(void)
 {
@@ -59,6 +61,7 @@ void main(void)
 	        }
 	        Write_char_LCD(button);
 	        Home_LCD();
+	        delay(10);
 	    }
 	}
 }
