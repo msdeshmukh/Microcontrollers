@@ -90,12 +90,39 @@ void main(void)
 	                break;
 	            case 8:
 	                button = HASH;
+	                if(passkey == PASSKEY)
+	                {
+	                    Clear_LCD();
+	                    keys = 0;
+	                    Write_string_LCD("UNLOCKED", 8);
+	                }
+	                else
+	                {
+	                    Clear_LCD();
+	                    keys = 0;
+	                    Write_string_LCD("LOCKED\nENTER KEY ", 17);
+	                }
 	                break;
 	            default:
 	                break;
 	        }
 	        keys ++;
 	        delay_us(100);
+	    }
+	    if(keys >= MAX_PASSKEY_LENGTH && (button = detect_key_press()) == 8)
+	    {
+	        if(passkey == PASSKEY)
+	        {
+	            Clear_LCD();
+	            keys = 0;
+	            Write_string_LCD("UNLOCKED", 8);
+	        }
+	        else
+	        {
+	            Clear_LCD();
+	            keys = 0;
+	            Write_string_LCD("LOCKED\nENTER KEY ", 17);
+	        }
 	    }
 	    delay_us(5);
 	}
