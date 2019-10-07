@@ -63,7 +63,7 @@ void main(void)
 	        }
 	        Write_char_LCD(button);
 	        Home_LCD();
-	        delay(10);
+	        delay_us(10);
 	    }
 	    delay_us(5);
 	}
