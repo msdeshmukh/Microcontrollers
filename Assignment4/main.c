@@ -31,31 +31,31 @@ void main(void)
 	            case 2:
 	                button = THREE;
 	                break;
-	            case 4:
+	            case 10:
 	                button = FOUR;
 	                break;
-	            case 5:
+	            case 9:
 	                button = FIVE;
 	                break;
-	            case 3:
+	            case 11:
 	                button = SIX;
 	                break;
-	            case 10:
+	            case 7:
 	                button = SEVEN;
 	                break;
-	            case 9:
+	            case 6:
 	                button = EIGHT;
 	                break;
-	            case 11:
+	            case 8:
 	                button = NINE;
 	                break;
-	            case 7:
+	            case 4:
 	                button = STAR;
 	                break;
-	            case 6:
+	            case 3:
 	                button = ZERO;
 	                break;
-	            case 8:
+	            case 5:
 	                button = HASH;
 	                break;
 	            default:

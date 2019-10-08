@@ -16,7 +16,9 @@ void main(void)
 	set_DCO(DCORSEL_24_MHz);
 	Initialize_LCD();
 	Initialize_keypad();
-	int button = -1, keys = 0, passkey = 0, divisor = DIVISOR;
+	int button = -1, keys = 0, i;
+	int passkey[6] = {0,0,0,0,0,0};
+	int lockkey[6] = {0,1,2,3,0,0};
 	Write_string_LCD("LOCKED\nENTER KEY ", 17);
 	while(1) {
 	    while((keys < MAX_PASSKEY_LENGTH) && (button = detect_key_press()) != 255)
@@ -25,104 +27,108 @@ void main(void)
 	        {
 	            case 1:
 	                Write_char_LCD(STAR);
-	                passkey += 1 * divisor;
-	                if(divisor > 1)
-	                    divisor = divisor/ 10;
+	                passkey[keys] = 1;
 	                break;
 	            case 0:
-	                Write_char_LCD(STAR);
-                    passkey += 2 * divisor;
-                    if(divisor > 1)
-                        divisor = divisor/ 10;
+                    Write_char_LCD(STAR);
+                    passkey[keys] = 2;
 	                break;
 	            case 2:
-	                Write_char_LCD(STAR);
-                    passkey += 3 * divisor;
-                    if(divisor > 1)
-                        divisor = divisor/ 10;
-	                break;
-	            case 4:
-	                Write_char_LCD(STAR);
-                    passkey += 4 * divisor;
-                    if(divisor > 1)
-                        divisor = divisor/ 10;
-	                break;
-	            case 5:
-	                Write_char_LCD(STAR);
-                    passkey += 5 * divisor;
-                    if(divisor > 1)
-                        divisor = divisor/ 10;
-	                break;
-	            case 3:
-	                Write_char_LCD(STAR);
-                    passkey += 6 * divisor;
-                    if(divisor > 1)
-                        divisor = divisor/ 10;
+                    Write_char_LCD(STAR);
+                    passkey[keys] = 3;
 	                break;
 	            case 10:
-	                Write_char_LCD(STAR);
-                    passkey += 7 * divisor;
-                    if(divisor > 1)
-                        divisor = divisor/ 10;
+                    Write_char_LCD(STAR);
+                    passkey[keys] = 4;
 	                break;
 	            case 9:
-	                Write_char_LCD(STAR);
-                    passkey += 8 * divisor;
-                    if(divisor > 1)
-                        divisor = divisor/ 10;
+                    Write_char_LCD(STAR);
+                    passkey[keys] = 5;
 	                break;
 	            case 11:
-	                Write_char_LCD(STAR);
-                    passkey += 9 * divisor;
-                    if(divisor > 1)
-                        divisor = divisor/ 10;
+                    Write_char_LCD(STAR);
+                    passkey[keys] = 6;
 	                break;
 	            case 7:
+                    Write_char_LCD(STAR);
+                    passkey[keys] = 7;
+	                break;
+	            case 6:
+                    Write_char_LCD(STAR);
+                    passkey[keys] = 8;
+	                break;
+	            case 8:
+	                Write_char_LCD(STAR);
+	                passkey[keys] = 9;
+	                break;
+	            case 4:
 	                Clear_LCD();
 	                keys = 0;
 	                Write_string_LCD("LOCKED\nENTER KEY ", 17);
 	                break;
-	            case 6:
-	                Write_char_LCD(STAR);
-                    passkey += 0 * divisor;
-                    if(divisor > 1)
-                        divisor = divisor/ 10;
+	            case 3:
+                    Write_char_LCD(STAR);
+                    passkey[keys] = 0;
 	                break;
-	            case 8:
-	                button = HASH;
-	                if(passkey == PASSKEY)
+	            case 5:
+	                if(keys != PASSKEY_LENGTH)
+	                {
+                        Clear_LCD();
+                        keys = 0;
+                        Write_string_LCD("LOCKED\nENTER KEY ", 17);
+	                    break;
+	                }
+	                for(i = 0; i < keys; i++)
+	                {
+	                    if(passkey[i] != lockkey[i])
+	                    {
+	                        Clear_LCD();
+	                        keys = 0;
+	                        Write_string_LCD("LOCKED\nENTER KEY ", 17);
+	                    }
+
+	                }
+	                if(i == keys)
 	                {
 	                    Clear_LCD();
 	                    keys = 0;
 	                    Write_string_LCD("UNLOCKED", 8);
-	                }
-	                else
-	                {
-	                    Clear_LCD();
-	                    keys = 0;
-	                    Write_string_LCD("LOCKED\nENTER KEY ", 17);
 	                }
 	                break;
 	            default:
 	                break;
 	        }
 	        keys ++;
-	        delay_us(100);
+	        delay_us(10);
 	    }
-	    if(keys >= MAX_PASSKEY_LENGTH && (button = detect_key_press()) == 8)
+	    if(keys >= MAX_PASSKEY_LENGTH && (button = detect_key_press()) == 5)
 	    {
-	        if(passkey == PASSKEY)
-	        {
-	            Clear_LCD();
-	            keys = 0;
-	            Write_string_LCD("UNLOCKED", 8);
-	        }
-	        else
-	        {
-	            Clear_LCD();
-	            keys = 0;
-	            Write_string_LCD("LOCKED\nENTER KEY ", 17);
-	        }
+            if(keys != PASSKEY_LENGTH)
+            {
+                Clear_LCD();
+                keys = 0;
+                Write_string_LCD("LOCKED\nENTER KEY ", 17);
+            }
+            else if(keys == PASSKEY_LENGTH)
+            {
+                for(i = 0; i < keys; i++)
+                {
+                    if(passkey[i] != lockkey[i])
+                    {
+                        Clear_LCD();
+                        keys = 0;
+                        Write_string_LCD("LOCKED\nENTER KEY ", 17);
+                        break;
+                    }
+
+                }
+                if(i == keys)
+                {
+                    Clear_LCD();
+                    keys = 0;
+                    Write_string_LCD("UNLOCKED", 8);
+                }
+            }
 	    }
 	    delay_us(5);
 	}
