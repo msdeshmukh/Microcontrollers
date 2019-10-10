@@ -70,7 +70,7 @@ void Write_char_LCD(char to_write) {
 
     // If we have reached the end of the display or been
     // given a newline character, go to the next line
-    if (++col > 15 || to_write == '\n') {
+    if (++col > 15 || to_write == '\n' ) {
         col = 0;
         row ^= 0x01;
     }
