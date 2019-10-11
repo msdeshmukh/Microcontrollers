@@ -17,6 +17,8 @@ TIMERA_ISR.obj: /Applications/ti/ccs910/ccs/ccs_base/arm/include/CMSIS/core_cm4.
 TIMERA_ISR.obj: /Applications/ti/ccs910/ccs/ccs_base/arm/include/CMSIS/cmsis_compiler.h
 TIMERA_ISR.obj: /Applications/ti/ccs910/ccs/ccs_base/arm/include/CMSIS/cmsis_ccs.h
 TIMERA_ISR.obj: /Applications/ti/ccs910/ccs/ccs_base/arm/include/system_msp432p401r.h
+TIMERA_ISR.obj: ../delay.h
+TIMERA_ISR.obj: ../TIMERA_ISR.h
 
 ../TIMERA_ISR.c: 
 /Applications/ti/ccs910/ccs/ccs_base/arm/include/msp.h: 
@@ -35,3 +37,5 @@ TIMERA_ISR.obj: /Applications/ti/ccs910/ccs/ccs_base/arm/include/system_msp432p4
 /Applications/ti/ccs910/ccs/ccs_base/arm/include/CMSIS/cmsis_compiler.h: 
 /Applications/ti/ccs910/ccs/ccs_base/arm/include/CMSIS/cmsis_ccs.h: 
 /Applications/ti/ccs910/ccs/ccs_base/arm/include/system_msp432p401r.h: 
+../delay.h: 
+../TIMERA_ISR.h: 

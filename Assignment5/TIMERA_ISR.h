@@ -8,6 +8,10 @@
 #ifndef TIMERA_ISR_H_
 #define TIMERA_ISR_H_
 
+#define MODE_25_DUTY
+//#define MODE_50_DUTY
+//#define MODE_2BIT
+
 void Initialize_Timers(void);
 
 void TA0_0_IRQHandler(void);
