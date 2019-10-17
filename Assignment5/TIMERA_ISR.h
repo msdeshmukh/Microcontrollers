@@ -2,7 +2,7 @@
  * TIMERA_ISR.h
  *
  *  Created on: Oct 10, 2019
- *      Author: ryanmyers
+ *      Author: Ryan Myers, Mihir Deshmukh
  */
 
 #ifndef TIMERA_ISR_H_

@@ -11,8 +11,8 @@
 #define DAC_RESOLUTION 0.00080566406f
 
 #define SPI_PORT P3
-#define SIMO    BIT2
-#define SOMI    BIT3
+#define SIMO    BIT3
+#define SOMI    BIT2
 #define SPI_CLK_PORT P4
 #define SPI_CLK BIT4
 #define CHIP_SEL BIT6
