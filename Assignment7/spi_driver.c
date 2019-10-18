@@ -38,16 +38,12 @@ void Initialize_SPI(void) {
     CHIP_SEL_PORT->SEL0 &= ~CHIP_SEL;
     CHIP_SEL_PORT->SEL1 &= ~CHIP_SEL;
 
-
-//    SPI_CLK_PORT->DIR |= SPI_CLK;
-//    SPI_CLK_PORT->REN &= ~SPI_CLK;
-//    SPI_CLK_PORT->SEL0 |= SPI_CLK;
-//    SPI_CLK_PORT->SEL1 &= ~SPI_CLK;
-
     EUSCI_B0->CTLW0 |= EUSCI_A_CTLW0_SWRST;
 
     EUSCI_B0->CTLW0 = EUSCI_B_CTLW0_SWRST
                         | EUSCI_B_CTLW0_MST
+                        | EUSCI_B_CTLW0_MSB
+                        | EUSCI_B_CTLW0_CKPH
                         | EUSCI_B_CTLW0_SYNC
                         | EUSCI_B_CTLW0_UCSSEL_2;
 
@@ -69,9 +65,5 @@ void Initialize_SPI(void) {
     SPI_PORT->SEL1 &= ~SPI_CLK;
 
     EUSCI_B0->CTLW0 &= ~EUSCI_B_CTLW0_SWRST;
-
-    EUSCI_B0->IE |= EUSCI_B_IE_RXIE | EUSCI_B_IE_TXIE;
-
-    NVIC->ISER[0] = (1 << (EUSCIB0_IRQn & 0x1F));
 
 }

@@ -8,7 +8,7 @@
 #ifndef SPI_DRIVER_H_
 #define SPI_DRIVER_H_
 
-#define DAC_RESOLUTION 0.00080566406f
+#define DAC_RESOLUTION 0.00080586079365f
 
 #define SPI_PORT P1
 #define SIMO    BIT6
