@@ -13,6 +13,5 @@ void main(void)
 
 	while(1)
 	{
-	    Send_DAC_Voltage(2.0);
 	}
 }

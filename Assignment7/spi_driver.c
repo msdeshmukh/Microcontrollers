@@ -17,10 +17,10 @@ void Send_DAC_Voltage(float v) {
     hibyte |= 0x30;
 
     SPI_PORT->OUT &= ~CHIP_SEL;
-    EUSCI_A2->TXBUF = hibyte;
-    while(!(EUSCI_A2->IFG & EUSCI_A_IFG_TXIFG));
-    EUSCI_A2->TXBUF = lobyte;
-    while(!(EUSCI_A2->IFG & EUSCI_A_IFG_RXIFG));
+    EUSCI_B0->TXBUF = hibyte;
+    while(!(EUSCI_B0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_B0->TXBUF = lobyte;
+    while(!(EUSCI_B0->IFG & EUSCI_A_IFG_RXIFG));
     SPI_PORT->OUT |= CHIP_SEL;
 
 }
@@ -40,19 +40,19 @@ void Initialize_SPI(void) {
     SPI_PORT->SEL1 &= ~CHIP_SEL;
 
 
-    SPI_CLK_PORT->DIR |= SPI_CLK;
-    SPI_CLK_PORT->REN &= ~SPI_CLK;
-    SPI_CLK_PORT->SEL0 |= SPI_CLK;
-    SPI_CLK_PORT->SEL1 &= ~SPI_CLK;
+//    SPI_CLK_PORT->DIR |= SPI_CLK;
+//    SPI_CLK_PORT->REN &= ~SPI_CLK;
+//    SPI_CLK_PORT->SEL0 |= SPI_CLK;
+//    SPI_CLK_PORT->SEL1 &= ~SPI_CLK;
 
-    EUSCI_A2->CTLW0 |= EUSCI_A_CTLW0_SWRST;
+    EUSCI_B0->CTLW0 |= EUSCI_A_CTLW0_SWRST;
 
-    EUSCI_A2->CTLW0 = EUSCI_A_CTLW0_SWRST
-                        | EUSCI_A_CTLW0_MST
-                        | EUSCI_A_CTLW0_SYNC
-                        | EUSCI_A_CTLW0_UCSSEL_2;
+    EUSCI_B0->CTLW0 = EUSCI_B_CTLW0_SWRST
+                        | EUSCI_B_CTLW0_MST
+                        | EUSCI_B_CTLW0_SYNC
+                        | EUSCI_B_CTLW0_UCSSEL_2;
 
-    EUSCI_A2->BRW = 0x01;
+    EUSCI_B0->BRW = 0x01;
 
     SPI_PORT->DIR |= SIMO;
     SPI_PORT->REN &= ~SIMO;
@@ -64,10 +64,10 @@ void Initialize_SPI(void) {
     SPI_PORT->SEL0 |= SOMI;
     SPI_PORT->SEL1 &= ~SOMI;
 
-    EUSCI_A2->CTLW0 &= ~EUSCI_A_CTLW0_SWRST;
+    EUSCI_B0->CTLW0 &= ~EUSCI_B_CTLW0_SWRST;
 
-    EUSCI_A2->IE |= EUSCI_A_IE_RXIE | EUSCI_A_IE_TXIE;
+    EUSCI_B0->IE |= EUSCI_B_IE_RXIE | EUSCI_B_IE_TXIE;
 
-    NVIC->ISER[0] = (1 << (EUSCIA0_IRQn & 0x1F));
+    NVIC->ISER[0] = (1 << (EUSCIB0_IRQn & 0x1F));
 
 }
