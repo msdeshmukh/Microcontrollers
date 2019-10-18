@@ -64,6 +64,11 @@ void Initialize_SPI(void) {
     SPI_PORT->SEL0 |= SOMI;
     SPI_PORT->SEL1 &= ~SOMI;
 
+    SPI_PORT->DIR |= SPI_CLK;
+    SPI_PORT->REN &= ~SPI_CLK;
+    SPI_PORT->SEL0 |= SPI_CLK;
+    SPI_PORT->SEL1 &= ~SPI_CLK;
+
     EUSCI_B0->CTLW0 &= ~EUSCI_B_CTLW0_SWRST;
 
     EUSCI_B0->IE |= EUSCI_B_IE_RXIE | EUSCI_B_IE_TXIE;
