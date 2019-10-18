@@ -7,11 +7,12 @@
 void main(void)
 {
 	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;		// stop watchdog timer
+	__disable_irq();
 	Initialize_SPI();
-	__enable_irq();
-	Send_DAC_Voltage(2.0);
+
 
 	while(1)
 	{
+	    Send_DAC_Voltage(2.0);
 	}
 }

@@ -16,12 +16,12 @@ void Send_DAC_Voltage(float v) {
     uint8_t hibyte = (out_volt >> 8) & 0x0F;
     hibyte |= 0x30;
 
-    SPI_PORT->OUT &= ~CHIP_SEL;
+    CHIP_SEL_PORT->OUT &= ~CHIP_SEL;
     EUSCI_B0->TXBUF = hibyte;
     while(!(EUSCI_B0->IFG & EUSCI_A_IFG_TXIFG));
     EUSCI_B0->TXBUF = lobyte;
     while(!(EUSCI_B0->IFG & EUSCI_A_IFG_RXIFG));
-    SPI_PORT->OUT |= CHIP_SEL;
+    CHIP_SEL_PORT->OUT |= CHIP_SEL;
 
 }
 
@@ -34,10 +34,9 @@ void Initialize_SPI(void) {
 
     CS->KEY = 0; // Lock clock registers
 
-    SPI_PORT->DIR |= CHIP_SEL;
-    SPI_PORT->REN &= ~CHIP_SEL;
-    SPI_PORT->SEL0 &= ~CHIP_SEL;
-    SPI_PORT->SEL1 &= ~CHIP_SEL;
+    CHIP_SEL_PORT->DIR |= CHIP_SEL;
+    CHIP_SEL_PORT->SEL0 &= ~CHIP_SEL;
+    CHIP_SEL_PORT->SEL1 &= ~CHIP_SEL;
 
 
 //    SPI_CLK_PORT->DIR |= SPI_CLK;

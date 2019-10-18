@@ -14,8 +14,8 @@
 #define SIMO    BIT6
 #define SOMI    BIT7
 #define SPI_CLK BIT5
-#define CHIP_SEL_PORT P6
-#define CHIP_SEL BIT6
+#define CHIP_SEL_PORT P5
+#define CHIP_SEL BIT0
 
 void Initialize_SPI(void);
 
