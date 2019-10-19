@@ -8,9 +8,6 @@
 #ifndef WAVEGEN_H_
 #define WAVEGEN_H_
 
-static uint8_t square_pulse = 0;
-static uint8_t triangle_pulse = 0;
-
 void Run_Squarewave(void);
 void Run_Trianglewave(void);
 
