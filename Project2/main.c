@@ -11,6 +11,10 @@
 typedef enum {SQUARE, SAWTOOTH, SIN, OFF} State;
 volatile State state;
 
+void HandleSinInput(void);
+void HandleSquareInput(void);
+void HandleSawtoothInput(void);
+
 void main(void)
 {
 	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;		// stop watchdog timer
@@ -38,19 +42,19 @@ void main(void)
 	    case SIN:
 	        HandleSinInput();
 	        break;
-
-	    }
-
 	    default:
 	        break;
+	    }
+
+
 
 	}
 }
 
 void HandleSquareInput(void) {
+    uint8_t input;
     while (state == SQUARE) {
-        input = detect_key_press();
-        switch(input) {
+        switch(input = detect_key_press()) {
         case 8:
             state = SIN;
             Run_Sinwave();
@@ -65,13 +69,35 @@ void HandleSquareInput(void) {
 }
 
 void HandleSinInput(void) {
+    uint8_t input;
     while (state == SIN) {
+        switch(input = detect_key_press()) {
+        case 7:
+            state = SQUARE;
+            Run_Squarewave();
+            break;
 
+        case 9:
+            state = SAWTOOTH;
+            Run_Sawtooth();
+            break;
     }
+}
 }
 
 void HandleSawtoothInput(void) {
+    uint8_t input;
     while (state == SAWTOOTH) {
+        switch(input = detect_key_press()) {
+        case 7:
+            state = SQUARE;
+            Run_Squarewave();
+            break;
 
+        case 8:
+            state = SIN;
+            Run_Sinwave();
+            break;
     }
+}
 }
