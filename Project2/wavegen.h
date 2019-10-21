@@ -16,6 +16,7 @@
 
 #define SIN_INC 0.001533980787f
 
+volatile float out_volt;
 float sin_table[4096];
 
 void Initialize_Wavegen(void);
