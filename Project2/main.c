@@ -8,7 +8,7 @@
  * main.c
  */
 
-typedef enum {SQUARE, SAWTOOTH, SIN, OFF} State;
+typedef enum {SQUARE, SAWTOOTH, SIN} State;
 volatile State state;
 
 void HandleSinInput(void);
@@ -18,8 +18,7 @@ void HandleSawtoothInput(void);
 void main(void)
 {
 	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;		// stop watchdog timer
-	state = OFF;
-	int input = -1;
+	state = SQUARE;
 	Initialize_SPI();
 	Initialize_keypad();
 	Initialize_LCD();
@@ -28,8 +27,6 @@ void main(void)
 	while (1) {
 
 	    switch(state) {
-	    case OFF:
-	        break;
 
 	    case SQUARE:
 	        HandleSquareInput();
@@ -42,8 +39,10 @@ void main(void)
 	    case SIN:
 	        HandleSinInput();
 	        break;
+
 	    default:
 	        break;
+
 	    }
 
 
@@ -53,33 +52,84 @@ void main(void)
 
 void HandleSquareInput(void) {
     uint8_t input;
+    uint8_t duty = 5;
+    Run_Squarewave();
     while (state == SQUARE) {
-        switch(input = detect_key_press()) {
+        Send_DAC_Voltage(out_volt);
+        input = detect_key_press();
+        switch(input) {
+
+        case 1:
+            TIMER_A0->CCR[0] = SQUARE_100_Hz;
+            TIMER_A0->CCR[1] = (SQUARE_100_Hz / 10) * duty;
+            break;
+
+        case 2:
+            TIMER_A0->CCR[0] = SQUARE_200_Hz;
+            TIMER_A0->CCR[1] = (SQUARE_200_Hz / 10) * duty;
+            break;
+
+        case 3:
+            TIMER_A0->CCR[0] = SQUARE_300_Hz;
+            TIMER_A0->CCR[1] = (SQUARE_300_Hz / 10) * duty;
+            break;
+
+        case 4:
+            TIMER_A0->CCR[0] = SQUARE_400_Hz;
+            TIMER_A0->CCR[1] = (SQUARE_400_Hz / 10) * duty;
+            break;
+
+        case 5:
+            TIMER_A0->CCR[0] = SQUARE_500_Hz;
+            TIMER_A0->CCR[1] = (SQUARE_500_Hz / 10) * duty;
+            break;
+
+
         case 8:
             state = SIN;
-            Run_Sinwave();
             break;
 
         case 9:
             state = SAWTOOTH;
-            Run_Sawtooth();
             break;
+
+        case 10:
+            if (duty == 1) {
+                return;
+            }
+            TIMER_A0->CCR[1] -= TIMER_A0->CCR[0] / 10;
+            duty--;
+            break;
+
+        case 11:
+            TIMER_A0->CCR[1] = TIMER_A0->CCR[0] / 2;
+            duty = 5;
+            break;
+
+        case 12:
+            if (duty == 9) {
+                return;
+            }
+            TIMER_A0->CCR[1] += TIMER_A0->CCR[0] / 10;
+            duty++;
+            break;
+
         }
     }
 }
 
 void HandleSinInput(void) {
     uint8_t input;
+    Run_Sinwave();
     while (state == SIN) {
-        switch(input = detect_key_press()) {
+        input = detect_key_press();
+        switch(input) {
         case 7:
             state = SQUARE;
-            Run_Squarewave();
             break;
 
         case 9:
             state = SAWTOOTH;
-            Run_Sawtooth();
             break;
     }
 }
@@ -87,16 +137,16 @@ void HandleSinInput(void) {
 
 void HandleSawtoothInput(void) {
     uint8_t input;
+    Run_Sawtooth();
     while (state == SAWTOOTH) {
-        switch(input = detect_key_press()) {
+        input = detect_key_press();
+        switch(input) {
         case 7:
             state = SQUARE;
-            Run_Squarewave();
             break;
 
         case 8:
             state = SIN;
-            Run_Sinwave();
             break;
     }
 }

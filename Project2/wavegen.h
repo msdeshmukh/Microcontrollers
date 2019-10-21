@@ -8,11 +8,11 @@
 #ifndef WAVEGEN_H_
 #define WAVEGEN_H_
 
-#define _100_Hz 15000
-#define _200_Hz 7500
-#define _300_Hz 5000
-#define _400_Hz 3750
-#define _500_Hz 3000
+#define SQUARE_100_Hz 15000
+#define SQUARE_200_Hz 7500
+#define SQUARE_300_Hz 5000
+#define SQUARE_400_Hz 3750
+#define SQUARE_500_Hz 3000
 
 #define SIN_INC 0.001533980787f
 
