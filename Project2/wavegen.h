@@ -14,10 +14,24 @@
 #define SQUARE_400_Hz 7500
 #define SQUARE_500_Hz 6000
 
-#define SIN_INC 0.001533980787f
+#define SIN_100_Hz 938
+#define SIN_200_Hz 469
+#define SIN_300_Hz 313
+#define SIN_400_Hz 235
+#define SIN_500_Hz 188
+
+#define SAW_100_Hz 938
+#define SAW_200_Hz 469
+#define SAW_300_Hz 313
+#define SAW_400_Hz 235
+#define SAW_500_Hz 188
+
+#define SIN_INC 0.0490873852f
+#define SAW_INC 0.0234375f
 
 volatile float out_volt;
-float sin_table[4096];
+float sin_table[128];
+float saw_table[128];
 
 void Initialize_Wavegen(void);
 

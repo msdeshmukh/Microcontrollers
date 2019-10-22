@@ -2,6 +2,7 @@
 #include "lcd_driver.h"
 #include "spi_driver.h"
 #include "keypad_driver.h"
+#include "delay.h"
 #include "wavegen.h"
 
 /**
@@ -18,7 +19,13 @@ void HandleSawtoothInput(void);
 void main(void)
 {
 	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;		// stop watchdog timer
+
+    P2->DIR |= BIT7;
+    P2->SEL0 &= ~BIT7;
+    P2->SEL1 &= ~BIT7;
+
 	state = SQUARE;
+	set_DCO(DCORSEL_12_MHz);
 	Initialize_SPI();
 	Initialize_keypad();
 	Initialize_LCD();
@@ -122,14 +129,39 @@ void HandleSinInput(void) {
     uint8_t input;
     Run_Sinwave();
     while (state == SIN) {
+        Send_DAC_Voltage(out_volt);
         input = detect_key_press();
         switch(input) {
-        case 7:
+
+        case 0:
+            TIMER_A1->CCR[0] = SIN_100_Hz;
+            break;
+
+        case 1:
+            TIMER_A1->CCR[0] = SIN_200_Hz;
+            break;
+
+        case 2:
+            TIMER_A1->CCR[0] = SIN_300_Hz;
+            break;
+
+        case 3:
+            TIMER_A1->CCR[0] = SIN_400_Hz;
+            break;
+
+        case 4:
+            TIMER_A1->CCR[0] = SIN_500_Hz;
+            break;
+
+        case 6:
             state = SQUARE;
             break;
 
-        case 9:
+        case 8:
             state = SAWTOOTH;
+            break;
+
+        default:
             break;
     }
 }
@@ -139,15 +171,38 @@ void HandleSawtoothInput(void) {
     uint8_t input;
     Run_Sawtooth();
     while (state == SAWTOOTH) {
+        Send_DAC_Voltage(out_volt);
         input = detect_key_press();
         switch(input) {
-        case 7:
+
+        case 0:
+            TIMER_A2->CCR[0] = SAW_100_Hz;
+            break;
+
+        case 1:
+            TIMER_A2->CCR[0] = SAW_200_Hz;
+            break;
+
+        case 2:
+            TIMER_A2->CCR[0] = SAW_300_Hz;
+            break;
+
+        case 3:
+            TIMER_A2->CCR[0] = SAW_400_Hz;
+            break;
+
+        case 4:
+            TIMER_A2->CCR[0] = SAW_500_Hz;
+            break;
+
+        case 6:
             state = SQUARE;
             break;
 
-        case 8:
+        case 7:
             state = SIN;
             break;
+
     }
 }
 }
