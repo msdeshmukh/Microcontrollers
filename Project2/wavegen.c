@@ -22,11 +22,13 @@ void Initialize_Wavegen(void) {
 void TA0_0_IRQHandler(void) {
     TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;
     out_volt = 3.0;
+    //P2->OUT ^= BIT3;
 }
 
 void TA0_N_IRQHandler(void) {
     TIMER_A0->CCTL[1] &= ~TIMER_A_CCTLN_CCIFG;
     out_volt = 0;
+    //P2->OUT ^= BIT4;
 }
 
 void TA1_0_IRQHandler(void) {
@@ -43,6 +45,14 @@ void Run_Squarewave(void) {
     TIMER_A1->CCTL[0] &= ~TIMER_A_CCTLN_CCIE;
     TIMER_A2->CCTL[0] &= ~TIMER_A_CCTLN_CCIE;
 
+//    P2->DIR |= BIT3;
+//    P2->SEL0 &= ~BIT3;
+//    P2->SEL1 &= ~BIT3;
+//
+//    P2->DIR |= BIT4;
+//    P2->SEL0 &= ~BIT4;
+//    P2->SEL1 &= ~BIT4;
+
     // default to 100 Hz at 50% duty cycle
     TIMER_A0->CCR[0] = SQUARE_100_Hz;
     TIMER_A0->CCTL[0] = TIMER_A_CCTLN_CCIE;
@@ -50,6 +60,7 @@ void Run_Squarewave(void) {
     TIMER_A0->CCR[1] = SQUARE_100_Hz / 2;
     TIMER_A0->CCTL[1] = TIMER_A_CCTLN_CCIE;
     NVIC->ISER[0] = (1 << (TA0_0_IRQn & 0x1F));
+    NVIC->ISER[0] = (1 << (TA0_N_IRQn & 0x1F));
 
 }
 

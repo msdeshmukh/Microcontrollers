@@ -59,56 +59,56 @@ void HandleSquareInput(void) {
         input = detect_key_press();
         switch(input) {
 
-        case 1:
+        case 0:
             TIMER_A0->CCR[0] = SQUARE_100_Hz;
             TIMER_A0->CCR[1] = (SQUARE_100_Hz / 10) * duty;
             break;
 
-        case 2:
+        case 1:
             TIMER_A0->CCR[0] = SQUARE_200_Hz;
             TIMER_A0->CCR[1] = (SQUARE_200_Hz / 10) * duty;
             break;
 
-        case 3:
+        case 2:
             TIMER_A0->CCR[0] = SQUARE_300_Hz;
             TIMER_A0->CCR[1] = (SQUARE_300_Hz / 10) * duty;
             break;
 
-        case 4:
+        case 3:
             TIMER_A0->CCR[0] = SQUARE_400_Hz;
             TIMER_A0->CCR[1] = (SQUARE_400_Hz / 10) * duty;
             break;
 
-        case 5:
+        case 4:
             TIMER_A0->CCR[0] = SQUARE_500_Hz;
             TIMER_A0->CCR[1] = (SQUARE_500_Hz / 10) * duty;
             break;
 
 
-        case 8:
+        case 7:
             state = SIN;
             break;
 
-        case 9:
+        case 8:
             state = SAWTOOTH;
             break;
 
-        case 10:
+        case 9:
             if (duty == 1) {
-                return;
+                break;;
             }
             TIMER_A0->CCR[1] -= TIMER_A0->CCR[0] / 10;
             duty--;
             break;
 
-        case 11:
+        case 10:
             TIMER_A0->CCR[1] = TIMER_A0->CCR[0] / 2;
             duty = 5;
             break;
 
-        case 12:
+        case 11:
             if (duty == 9) {
-                return;
+                break;;
             }
             TIMER_A0->CCR[1] += TIMER_A0->CCR[0] / 10;
             duty++;
