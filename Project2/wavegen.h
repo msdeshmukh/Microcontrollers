@@ -1,8 +1,8 @@
 /*
  * wavegen.h
  *
- *  Created on: Oct 18, 2019
- *      Author: ryanmyers
+ *   Created on: Oct 18, 2019
+ *   Author: Ryan Myers, Mihir Deshmukh
  */
 
 #ifndef WAVEGEN_H_

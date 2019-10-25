@@ -6,7 +6,9 @@
 #include "wavegen.h"
 
 /**
- * main.c
+ *  main.c
+ *  Created on: Oct 18, 2019
+ *  Author: Ryan Myers, Mihir Deshmukh
  */
 
 typedef enum {SQUARE, SAWTOOTH, SIN} State;
@@ -19,18 +21,15 @@ void HandleSawtoothInput(void);
 void main(void)
 {
 	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;		// stop watchdog timer
-
-    P2->DIR |= BIT7;
-    P2->SEL0 &= ~BIT7;
-    P2->SEL1 &= ~BIT7;
-
 	state = SQUARE;
 	set_DCO(DCORSEL_12_MHz);
 	Initialize_SPI();
 	Initialize_keypad();
-	Initialize_LCD();
 	Initialize_Wavegen();
 
+	//State based architecture where based on the key it moves into a state
+	//and prints the corresponding waveform. The frequency of a pulse is
+	//controlled in those functions below.
 	while (1) {
 
 	    switch(state) {
@@ -52,11 +51,13 @@ void main(void)
 
 	    }
 
-
-
 	}
 }
 
+//Stay in square state unless a key that changes the waveform is pressed
+//If a key to change the frequency is pressed, change the time at which
+//the timer interrupts. If the duty cycle changes, change the time the
+//second interrupt triggers.
 void HandleSquareInput(void) {
     uint8_t input;
     uint8_t duty = 5;
@@ -91,7 +92,7 @@ void HandleSquareInput(void) {
             TIMER_A0->CCR[1] = (SQUARE_500_Hz / 10) * duty;
             break;
 
-
+        //Change state and break to while loop in main.
         case 7:
             state = SIN;
             break;
@@ -100,6 +101,7 @@ void HandleSquareInput(void) {
             state = SAWTOOTH;
             break;
 
+        //Decrease the value of duty that controls the duty cycle
         case 9:
             if (duty == 1) {
                 break;;
@@ -107,15 +109,15 @@ void HandleSquareInput(void) {
             TIMER_A0->CCR[1] -= TIMER_A0->CCR[0] / 10;
             duty--;
             break;
-
+        //Reset duty cycle back to 50%
         case 10:
             TIMER_A0->CCR[1] = TIMER_A0->CCR[0] / 2;
             duty = 5;
             break;
-
+        //Increase the value of duty that controls the duty cycle
         case 11:
             if (duty == 9) {
-                break;;
+                break;
             }
             TIMER_A0->CCR[1] += TIMER_A0->CCR[0] / 10;
             duty++;
@@ -125,6 +127,9 @@ void HandleSquareInput(void) {
     }
 }
 
+//Stay in sin state unless a key that changes the waveform is pressed
+//If a key to change the frequency is pressed, change the time at which
+//the timer interrupts.
 void HandleSinInput(void) {
     uint8_t input;
     Run_Sinwave();
@@ -163,10 +168,13 @@ void HandleSinInput(void) {
 
         default:
             break;
+        }
     }
 }
-}
 
+//Stay in saw state unless a key that changes the waveform is pressed
+//If a key to change the frequency is pressed, change the time at which
+//the timer interrupts.
 void HandleSawtoothInput(void) {
     uint8_t input;
     Run_Sawtooth();

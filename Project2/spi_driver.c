@@ -8,6 +8,9 @@
 #include "msp.h"
 #include "spi_driver.h"
 
+//Standard code to send voltage to dac. Divide 16 bit
+//value into high byte and low byte and send sequentially
+//Once Tx Rx buffers are empty.
 void Send_DAC_Voltage(float v) {
 
     uint16_t out_volt = (uint16_t)(v / DAC_RESOLUTION);
@@ -34,10 +37,12 @@ void Initialize_SPI(void) {
 
     CS->KEY = 0; // Lock clock registers
 
+    //Initialize chip select port
     CHIP_SEL_PORT->DIR |= CHIP_SEL;
     CHIP_SEL_PORT->SEL0 &= ~CHIP_SEL;
     CHIP_SEL_PORT->SEL1 &= ~CHIP_SEL;
 
+    //Standard SPI initialization sequence
     EUSCI_B0->CTLW0 |= EUSCI_A_CTLW0_SWRST;
 
     EUSCI_B0->CTLW0 = EUSCI_B_CTLW0_SWRST
@@ -49,6 +54,7 @@ void Initialize_SPI(void) {
 
     EUSCI_B0->BRW = 0x01;
 
+    //Initialize SIMO, SOMI and CLK ports.
     SPI_PORT->DIR |= SIMO;
     SPI_PORT->REN &= ~SIMO;
     SPI_PORT->SEL0 |= SIMO;
