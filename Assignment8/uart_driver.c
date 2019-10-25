@@ -8,8 +8,20 @@
 #include "msp.h"
 #include "uart_driver.h"
 
+void EUSCIA0_0_IRQHandler(void) {
+    EUSCI_A0->IFG &= ~EUSCI_A_IFG_RXIFG;
+    unsigned char rx_char = EUSCI_A0->RXBUF;
+    Send_Serial_Char(rx_char);
+}
+
+void Send_Serial_Char(unsigned char c) {
+    EUSCI_A0->TXBUF = c;
+    while(!(EUSCI_B0->IFG & EUSCI_A_IFG_TXIFG));
+}
+
 void Initialize_UART(void)
 {
+
     CS->KEY = CS_KEY_VAL;   // Unlock clock registers
 
     CS->CTL1 &= ~(CS_CTL1_DIVHS_MASK | CS_CTL1_DIVS_MASK | CS_CTL1_SELS_MASK); // Clear CS registers
@@ -18,4 +30,23 @@ void Initialize_UART(void)
     CS->KEY = 0; // Lock clock registers
 
     EUSCI_A0->CTLW0 = EUSCI_A_CTLW0_SWRST;
+
+    EUSCI_A0->CTLW0 = EUSCI_A_CTLW0_SWRST
+                        | EUSCI_A_CTLW0_SSEL__SMCLK;
+
+    EUSCI_A0->MCTLW = (FBRCLK_12MHz_UCBRS << 8)
+                            | (FBRCLK_12MHz_UCBRF << 4)
+                            | (FBRCLK_12MHz_OS16);
+
+    UART_PORT->DIR |= UART_TXD;
+    UART_PORT->DIR &= ~UART_RXD;
+    UART_PORT->SEL0 |= UART_TXD | UART_RXD;
+    UART_PORT->SEL1 &= ~(UART_TXD | UART_RXD);
+    UART_PORT->REN &= ~(UART_TXD | UART_RXD);
+
+    EUSCI_A0->CTLW0 &= ~EUSCI_A_CTLW0_SWRST;
+
+    EUSCI_A0->IE |= EUSCI_A_IE_RXIE;
+    NVIC->ISER[0] = (1 << (EUSCIA0_IRQn & 0x1F));
+
 }
