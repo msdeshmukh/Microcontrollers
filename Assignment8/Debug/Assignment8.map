@@ -1,10 +1,10 @@
 ******************************************************************************
-                  TI ARM Linker Unix v18.12.2                  
+                  TI ARM Linker PC v18.12.2                    
 ******************************************************************************
->> Linked Fri Oct 25 13:10:32 2019
+>> Linked Fri Oct 25 13:26:26 2019
 
 OUTPUT FILE NAME:   <Assignment8.out>
-ENTRY POINT SYMBOL: "_c_int00_noargs"  address: 000007d5
+ENTRY POINT SYMBOL: "_c_int00_noargs"  address: 000007d1
 
 
 MEMORY CONFIGURATION
@@ -41,13 +41,13 @@ section   page    origin      length       input sections
 
 .text      0    000000e4    00000768     
                   000000e4    00000334     system_msp432p401r.obj (.text)
-                  00000418    00000178     delay.obj (.text)
-                  00000590    000000fc     uart_driver.obj (.text)
-                  0000068c    0000009c     rtsv7M4_T_le_v4SPD16_eabi.lib : memcpy_t2.asm.obj (.text)
-                  00000728    00000068                                   : copy_decompress_lzss.c.obj (.text:decompress:lzss:__TI_decompress_lzss)
-                  00000790    00000044                                   : autoinit.c.obj (.text:__TI_auto_init_nobinit_nopinit:__TI_auto_init_nobinit_nopinit)
-                  000007d4    00000034                                   : boot_cortex_m.c.obj (.text:_c_int00_noargs:_c_int00_noargs)
-                  00000808    00000020     main.obj (.text)
+                  00000418    00000174     delay.obj (.text)
+                  0000058c    000000fc     uart_driver.obj (.text)
+                  00000688    0000009c     rtsv7M4_T_le_v4SPD16_eabi.lib : memcpy_t2.asm.obj (.text)
+                  00000724    00000068                                   : copy_decompress_lzss.c.obj (.text:decompress:lzss:__TI_decompress_lzss)
+                  0000078c    00000044                                   : autoinit.c.obj (.text:__TI_auto_init_nobinit_nopinit:__TI_auto_init_nobinit_nopinit)
+                  000007d0    00000034                                   : boot_cortex_m.c.obj (.text:_c_int00_noargs:_c_int00_noargs)
+                  00000804    00000024     main.obj (.text)
                   00000828    0000000e     rtsv7M4_T_le_v4SPD16_eabi.lib : copy_decompress_none.c.obj (.text:decompress:none:__TI_decompress_none)
                   00000836    0000000e     startup_msp432p401r_ccs.obj (.text)
                   00000844    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : pre_init.c.obj (.text:_system_pre_init)
@@ -74,16 +74,16 @@ MODULE SUMMARY
 
        Module                        code   ro data   rw data
        ------                        ----   -------   -------
-    ./
+    .\
        system_msp432p401r.obj        820    0         8      
-       delay.obj                     376    0         0      
+       delay.obj                     372    0         0      
        uart_driver.obj               252    0         0      
        startup_msp432p401r_ccs.obj   14     228       0      
-       main.obj                      32     0         0      
+       main.obj                      36     0         0      
     +--+-----------------------------+------+---------+---------+
        Total:                        1494   228       8      
                                                              
-    /Applications/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/lib/rtsv7M4_T_le_v4SPD16_eabi.lib
+    C:\ti\ccs910\ccs\tools\compiler\ti-cgt-arm_18.12.2.LTS\lib\rtsv7M4_T_le_v4SPD16_eabi.lib
        memcpy_t2.asm.obj             156    0         0      
        copy_decompress_lzss.c.obj    104    0         0      
        autoinit.c.obj                68     0         0      
@@ -131,7 +131,7 @@ address   name
 00000843  DMA_INT3_IRQHandler           
 00000843  DebugMon_Handler              
 00000843  Default_Handler               
-00000591  EUSCIA0_0_IRQHandler          
+0000058d  EUSCIA0_0_IRQHandler          
 00000843  EUSCIA0_IRQHandler            
 00000843  EUSCIA1_IRQHandler            
 00000843  EUSCIA2_IRQHandler            
@@ -143,7 +143,7 @@ address   name
 00000843  FLCTL_IRQHandler              
 00000843  FPU_IRQHandler                
 00000843  HardFault_Handler             
-000005cb  Initialize_UART               
+000005c7  Initialize_UART               
 00000843  MemManage_Handler             
 00000843  NMI_Handler                   
 00000843  PCM_IRQHandler                
@@ -158,7 +158,7 @@ address   name
 00000843  RTC_C_IRQHandler              
 00000837  Reset_Handler                 
 00000843  SVC_Handler                   
-000005af  Send_Serial_Char              
+000005ab  Send_Serial_Char              
 00000843  SysTick_Handler               
 20000000  SystemCoreClock               
 000000e5  SystemCoreClockUpdate         
@@ -183,29 +183,29 @@ address   name
 00000868  __TI_CINIT_Limit              
 00000858  __TI_Handler_Table_Base       
 00000860  __TI_Handler_Table_Limit      
-00000791  __TI_auto_init_nobinit_nopinit
-00000729  __TI_decompress_lzss          
+0000078d  __TI_auto_init_nobinit_nopinit
+00000725  __TI_decompress_lzss          
 00000829  __TI_decompress_none          
 ffffffff  __TI_pprof_out_hndl           
 ffffffff  __TI_prof_data_size           
 ffffffff  __TI_prof_data_start          
 00000000  __TI_static_base__            
-0000068d  __aeabi_memcpy                
-0000068d  __aeabi_memcpy4               
-0000068d  __aeabi_memcpy8               
+00000689  __aeabi_memcpy                
+00000689  __aeabi_memcpy4               
+00000689  __aeabi_memcpy8               
 ffffffff  __binit__                     
 ffffffff  __c_args__                    
 UNDEFED   __mpu_init                    
 2000fe00  __stack                       
-000007d5  _c_int00_noargs               
+000007d1  _c_int00_noargs               
 UNDEFED   _system_post_cinit            
 00000845  _system_pre_init              
 00000849  abort                         
 ffffffff  binit                         
 00000491  delay_us                      
 00000000  interruptVectors              
-00000809  main                          
-0000068d  memcpy                        
+00000805  main                          
+00000689  memcpy                        
 00000419  set_DCO                       
 
 
@@ -220,17 +220,17 @@ address   name
 0000035d  SystemInit                    
 00000419  set_DCO                       
 00000491  delay_us                      
-00000591  EUSCIA0_0_IRQHandler          
-000005af  Send_Serial_Char              
-000005cb  Initialize_UART               
-0000068d  __aeabi_memcpy                
-0000068d  __aeabi_memcpy4               
-0000068d  __aeabi_memcpy8               
-0000068d  memcpy                        
-00000729  __TI_decompress_lzss          
-00000791  __TI_auto_init_nobinit_nopinit
-000007d5  _c_int00_noargs               
-00000809  main                          
+0000058d  EUSCIA0_0_IRQHandler          
+000005ab  Send_Serial_Char              
+000005c7  Initialize_UART               
+00000689  __aeabi_memcpy                
+00000689  __aeabi_memcpy4               
+00000689  __aeabi_memcpy8               
+00000689  memcpy                        
+00000725  __TI_decompress_lzss          
+0000078d  __TI_auto_init_nobinit_nopinit
+000007d1  _c_int00_noargs               
+00000805  main                          
 00000829  __TI_decompress_none          
 00000837  Reset_Handler                 
 00000843  ADC14_IRQHandler              

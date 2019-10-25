@@ -12,7 +12,7 @@ void main(void)
 	Initialize_UART();
 	__enable_irq();
 	while(1) {
-
+	    Send_Serial_Char('a');
 	}
 
 }

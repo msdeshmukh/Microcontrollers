@@ -32,7 +32,8 @@ void Initialize_UART(void)
     EUSCI_A0->CTLW0 = EUSCI_A_CTLW0_SWRST;
 
     EUSCI_A0->CTLW0 = EUSCI_A_CTLW0_SWRST
-                        | EUSCI_A_CTLW0_SSEL__SMCLK;
+                        | EUSCI_A_CTLW0_SSEL__SMCLK
+                        | EUSCI_A_CTLW0_MSB;
 
     EUSCI_A0->MCTLW = (FBRCLK_12MHz_UCBRS << 8)
                             | (FBRCLK_12MHz_UCBRF << 4)
