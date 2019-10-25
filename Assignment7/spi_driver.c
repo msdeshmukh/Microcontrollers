@@ -38,7 +38,7 @@ void Initialize_SPI(void) {
     CHIP_SEL_PORT->SEL0 &= ~CHIP_SEL;
     CHIP_SEL_PORT->SEL1 &= ~CHIP_SEL;
 
-    EUSCI_B0->CTLW0 |= EUSCI_A_CTLW0_SWRST;
+    EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_SWRST;
 
     EUSCI_B0->CTLW0 = EUSCI_B_CTLW0_SWRST
                         | EUSCI_B_CTLW0_MST

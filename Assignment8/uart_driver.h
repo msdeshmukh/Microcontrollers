@@ -14,7 +14,7 @@
 
 #define FBRCLK_12MHz_UCBRx 78
 #define FBRCLK_12MHz_UCBRF 2
-#define FBRCLK_12MHz_UCBRS 0x0
+#define FBRCLK_12MHz_UCBRS 0x08
 #define FBRCLK_12MHz_OS16 1
 
 void EUSCIA0_0_IRQHandler(void);
