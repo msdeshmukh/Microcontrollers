@@ -9,14 +9,15 @@
 #include "uart_driver.h"
 
 void EUSCIA0_0_IRQHandler(void) {
-    EUSCI_A0->IFG &= ~EUSCI_A_IFG_RXIFG;
+    //EUSCI_A0->IFG &= ~EUSCI_A_IFG_RXIFG;
     unsigned char rx_char = EUSCI_A0->RXBUF;
-    Send_Serial_Char(rx_char);
+    //Send_Serial_Char(rx_char);
+    EUSCI_A0->TXBUF = rx_char;
 }
 
 void Send_Serial_Char(unsigned char c) {
-    EUSCI_A0->TXBUF = c;
-    while(!(EUSCI_B0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //while(!(EUSCI_B0->IFG & EUSCI_A_IFG_TXIFG));
 }
 
 void Initialize_UART(void)
@@ -32,7 +33,7 @@ void Initialize_UART(void)
     EUSCI_A0->CTLW0 = EUSCI_A_CTLW0_SWRST;
 
     EUSCI_A0->CTLW0 = EUSCI_A_CTLW0_SWRST
-                        | EUSCI_A_CTLW0_SSEL__SMCLK;
+                        | EUSCI_A_CTLW0_UCSSEL_2;
 
     EUSCI_A0->MCTLW = (FBRCLK_12MHz_UCBRS << 8)
                             | (FBRCLK_12MHz_UCBRF << 4)
@@ -46,7 +47,7 @@ void Initialize_UART(void)
 
     EUSCI_A0->CTLW0 &= ~EUSCI_A_CTLW0_SWRST;
 
-    EUSCI_A0->IE |= EUSCI_A_IE_RXIE;
-    NVIC->ISER[0] = (1 << (EUSCIA0_IRQn & 0x1F));
+//    EUSCI_A0->IE |= EUSCI_A_IE_RXIE;
+//    NVIC->ISER[0] = (1 << (EUSCIA0_IRQn & 0x1F));
 
 }

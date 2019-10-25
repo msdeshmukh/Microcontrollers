@@ -12,7 +12,8 @@ void main(void)
 	Initialize_UART();
 	__enable_irq();
 	while(1) {
-	    Send_Serial_Char('a');
+	    EUSCI_A0->TXBUF = 'a';
+	    while(!(EUSCI_B0->IFG & EUSCI_A_IFG_TXIFG));
 	}
 
 }
