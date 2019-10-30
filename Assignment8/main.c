@@ -16,6 +16,7 @@ void main(void)
 	Initialize_UART();
 	Initialize_SPI();
 	__enable_irq();
+	Send_DAC_Voltage(0);
 	while(1) {
 	    if (CheckInputFlag() == INPUT_READY) {
 	        OutputVoltage();
