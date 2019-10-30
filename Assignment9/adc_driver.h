@@ -8,6 +8,11 @@
 #ifndef ADC_DRIVER_H_
 #define ADC_DRIVER_H_
 
+#define ADCPORT P4
+#define ADCPIN BIT7
+
+static uint32_t ADC_Value;
+
 void Initialize_ADC(void);
 void ADC14_IRQHandler(void);
 
