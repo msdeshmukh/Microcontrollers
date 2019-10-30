@@ -8,6 +8,7 @@
 #include "msp.h"
 #include "adc_driver.h"
 
+static volatile uint16_t ADC_Value;
 
 void Initialize_ADC(void) {
     CS->KEY = CS_KEY_VAL;   // Unlock clock registers
@@ -18,7 +19,8 @@ void Initialize_ADC(void) {
     CS->KEY = 0; // Lock clock registers
 
     ADC14->CTL0 &= ~ADC14_CTL0_ENC;      //Disable conversion
-    ADC14->CTL0 = ADC14_CTL0_SSEL_4|     //Select SMCLK
+    ADC14->CTL0 = ADC14_CTL0_SHP |       //Enable internal sample timer
+                  ADC14_CTL0_SSEL_4 |    //Select SMCLK
                   ADC14_CTL0_CONSEQ_2 |  //Single repeat channel
                   ADC14_CTL0_SHT0_0 |    //Sample 4 clocks
                   ADC14_CTL0_MSC |       //Auto repeat
@@ -28,10 +30,10 @@ void Initialize_ADC(void) {
     ADC14->IER0 = ADC14_IER0_IE0;        //Enable interrupts on mem[0]
     ADCPORT->SEL0 |= ADCPIN;             //Initialize port to accept input
     ADCPORT->SEL1 |= ADCPIN;
-    ADC14->CTL0 |= ADC14_CTL0_ENC;       //Enable conversion
-    ADC14->CTL0 |= ADC14_CTL0_SC;        //Enable sampling
     NVIC->ISER[0] = 1 << (ADC14_IRQn & 0x1F);
     __enable_irq();
+    ADC14->CTL0 |= ADC14_CTL0_SC;        //Enable sampling
+    ADC14->CTL0 |= ADC14_CTL0_ENC;
 }
 
 void ADC14_IRQHandler(void) {
