@@ -11,8 +11,6 @@
 #define ADCPORT P4
 #define ADCPIN BIT7
 
-static volatile uint16_t ADC_Value;
-
 void Initialize_ADC(void);
 void ADC14_IRQHandler(void);
 
