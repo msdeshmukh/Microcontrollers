@@ -32,8 +32,8 @@ void Initialize_ADC(void) {
     ADCPORT->SEL1 |= ADCPIN;
     NVIC->ISER[0] = 1 << (ADC14_IRQn & 0x1F);
     __enable_irq();
-    ADC14->CTL0 |= ADC14_CTL0_SC;        //Enable sampling
-    ADC14->CTL0 |= ADC14_CTL0_ENC;
+    ADC14->CTL0 |= ADC14_CTL0_ENC |       //Enable conversion again
+                   ADC14_CTL0_SC;         //Enable sampling
 }
 
 void ADC14_IRQHandler(void) {
