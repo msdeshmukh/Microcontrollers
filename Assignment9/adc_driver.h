@@ -10,8 +10,11 @@
 
 #define ADCPORT P4
 #define ADCPIN BIT7
+#define ADC_READY 1
+#define ADC_UNAVAILABLE 0
 
 void Initialize_ADC(void);
 void ADC14_IRQHandler(void);
+int ReadADC(void);
 
 #endif /* ADC_DRIVER_H_ */

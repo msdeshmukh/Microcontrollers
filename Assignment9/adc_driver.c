@@ -9,6 +9,7 @@
 #include "adc_driver.h"
 
 static volatile uint16_t ADC_Value;
+static volatile uint8_t ADC_Flag;
 
 void Initialize_ADC(void) {
     CS->KEY = CS_KEY_VAL;   // Unlock clock registers
@@ -37,7 +38,18 @@ void Initialize_ADC(void) {
 }
 
 void ADC14_IRQHandler(void) {
+    ADC14->CLRIFGR0 |= ADC14_CLRIFGR0_CLRIFG0;
     ADC_Value = ADC14->MEM[0];
+    ADC_Flag = ADC_Ready;
+}
 
+int ReadADC(void) {
+    if (ADC_Flag == ADC_UNAVAILABLE) {
+        return -1;
+    }
+    else if (ADC_Flag == ADC_Ready) {
+        ADC_Flag = ADC_UNAVAILABLE;
+        return ADC_Value;
+    }
 }
 
