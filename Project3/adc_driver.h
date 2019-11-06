@@ -8,8 +8,8 @@
 #ifndef ADC_DRIVER_H_
 #define ADC_DRIVER_H_
 
-#define ADCPORT P4
-#define ADCPIN BIT7
+#define ADCPORT P5
+#define ADCPIN BIT5
 #define MEASUREMENT_READY 1
 #define MEASUREMENT_UNAVAILABLE 0
 #define ADC_RES 16383

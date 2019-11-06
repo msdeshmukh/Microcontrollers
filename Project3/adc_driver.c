@@ -31,7 +31,7 @@ void Initialize_ADC(void) {
     ADC14->CTL0 = ADC14_CTL0_SHP |       //Enable internal sample timer
                   ADC14_CTL0_SSEL_4 |    //Select SMCLK
                   ADC14_CTL0_CONSEQ_2 |  //Single repeat channel
-                  ADC14_CTL0_SHT0_6 |    //Sample 96 clocks
+                  ADC14_CTL0_SHT0_2 |    //Sample 192 clocks
                   ADC14_CTL0_MSC |       //Auto repeat
                   ADC14_CTL0_ON;         //Turn on ADC
     ADC14->CTL1 = ADC14_CTL1_RES_3;      //14 Bit resolution and mem[0]
@@ -39,9 +39,9 @@ void Initialize_ADC(void) {
     ADC14->IER0 = ADC14_IER0_IE0;        //Enable interrupts on mem[0]
     ADCPORT->SEL0 |= ADCPIN;             //Initialize port to accept input
     ADCPORT->SEL1 |= ADCPIN;
-    NVIC->ISER[0] = 1 << (ADC14_IRQn & 0x1F);
     ADC14->CTL0 |= ADC14_CTL0_ENC |       //Enable conversion again
                    ADC14_CTL0_SC;         //Enable sampling
+    NVIC->ISER[0] = 1 << (ADC14_IRQn & 0x1F);
 
     Measurement_Flag = MEASUREMENT_UNAVAILABLE;
 
@@ -64,7 +64,7 @@ void Initialize_ADC(void) {
 
 void ADC14_IRQHandler(void) {
     static volatile uint32_t irq_cnt = 0;
-    ADC14->CLRIFGR0 |= ADC14_CLRIFGR0_CLRIFG0;
+    //ADC14->CLRIFGR0 |= ADC14_CLRIFGR0_CLRIFG0;
     ADC_Value = ADC14->MEM[0];
     if (ADC_Value > peak) {
         peak = ADC_Value;
@@ -77,7 +77,7 @@ void ADC14_IRQHandler(void) {
     }
     else if ((ADC_Value & 0x3FF8) == (trough & 0x3FF8)) {
         TIMER_A2->CCR[0] = 0;
-        freq - 1000/ms_cnt;
+        freq = 1000/ms_cnt;
         ms_cnt = 0;
     }
     dc_measurements[irq_cnt++ % 10] = ADC_Value;

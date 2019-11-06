@@ -23,7 +23,7 @@ void Initialize_ADC(void) {
     ADC14->CTL0 = ADC14_CTL0_SHP |       //Enable internal sample timer
                   ADC14_CTL0_SSEL_4 |    //Select SMCLK
                   ADC14_CTL0_CONSEQ_2 |  //Single repeat channel
-                  ADC14_CTL0_SHT0_0 |    //Sample 4 clocks
+                  ADC14_CTL0_SHT0_2 |    //Sample 192 clocks
                   ADC14_CTL0_MSC |       //Auto repeat
                   ADC14_CTL0_ON;         //Turn on ADC
     ADC14->CTL1 = ADC14_CTL1_RES_3;      //14 Bit resolution and mem[0]
@@ -31,25 +31,26 @@ void Initialize_ADC(void) {
     ADC14->IER0 = ADC14_IER0_IE0;        //Enable interrupts on mem[0]
     ADCPORT->SEL0 |= ADCPIN;             //Initialize port to accept input
     ADCPORT->SEL1 |= ADCPIN;
-    NVIC->ISER[0] = 1 << (ADC14_IRQn & 0x1F);
-    __enable_irq();
     ADC14->CTL0 |= ADC14_CTL0_ENC |       //Enable conversion again
                    ADC14_CTL0_SC;         //Enable sampling
+    NVIC->ISER[0] = 1 << (ADC14_IRQn & 0x1F);
 }
 
 void ADC14_IRQHandler(void) {
-    ADC14->CLRIFGR0 |= ADC14_CLRIFGR0_CLRIFG0;
+    __disable_irq();
     ADC_Value = ADC14->MEM[0];
-    ADC_Flag = ADC_Ready;
+    ADC_Flag = ADC_READY;
 }
 
 int ReadADC(void) {
     if (ADC_Flag == ADC_UNAVAILABLE) {
         return -1;
     }
-    else if (ADC_Flag == ADC_Ready) {
+    else if (ADC_Flag == ADC_READY) {
         ADC_Flag = ADC_UNAVAILABLE;
         return ADC_Value;
     }
 }
+
+
 

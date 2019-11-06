@@ -13,12 +13,13 @@ void main(void)
 	Initialize_ADC();
 	Initialize_UART();
     __enable_irq();
+    uint32_t frequency;
 	while(1) {
 	    if (Read_Measurement_Flag()) {
 	        //float dc = Read_DC();
 	        //float ac_pp = Read_AC_PP();
 	        //float ac_rms = Read_AC_RMS();
-	        uint32_t frequency =  Read_Freq();
+	         frequency = Read_Freq();
 	    }
 	}
 }
