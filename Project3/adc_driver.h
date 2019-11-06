@@ -20,6 +20,9 @@ float Read_AC_PP(void);
 float Read_AC_RMS(void);
 float Read_DC(void);
 void TIMERA0_0_IRQHandler(void);
+void TIMERA1_0_IRQHandler(void);
+void TIMERA2_0_IRQHandler(void);
+uint32_t Read_Freq(void);
 uint8_t Read_Measurement_Flag(void);
 
 #endif /* ADC_DRIVER_H_ */

@@ -8,6 +8,7 @@
 #include "msp.h"
 #include "adc_driver.h"
 
+static volatile uint32_t ms_cnt = 0;
 static volatile uint8_t Measurement_Flag;
 static volatile uint16_t ADC_Value;
 static volatile uint16_t peak = 0;
@@ -47,11 +48,18 @@ void Initialize_ADC(void) {
 
     TIMER_A0->CCR[0] = 65535;
     TIMER_A0->CCTL[0] = TIMER_A_CCTLN_CCIE;
+    TIMER_A0->CTL = TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1;
     NVIC->ISER[0] = (1 << (TA0_0_IRQn & 0x1F));
 
     TIMER_A1->CCR[0] = 1200;
     TIMER_A1->CCTL[0] = TIMER_A_CCTLN_CCIE;
+    TIMER_A1->CTL = TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1;
     NVIC->ISER[0] = (1 << (TA1_0_IRQn & 0x1F));
+
+    TIMER_A2->CCR[0] = 0;
+    TIMER_A2->CCTL[0] = TIMER_A_CCTLN_CCIE;
+    TIMER_A2->CTL = TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1;
+    NVIC->ISER[0] = (1 << (TA2_0_IRQn & 0x1F));
 
 }
 
@@ -65,10 +73,17 @@ void ADC14_IRQHandler(void) {
     else if (ADC_Value < trough) {
         trough = ADC_Value;
     }
+    if ((ADC_Value & 0x3FF8) == (peak & 0x3FF8)) {
+        TIMER_A2->CCR[0] = 6000;
+    }
+    else if ((ADC_Value & 0x3FF8) == (trough & 0x3FF8)) {
+        TIMER_A2->CCR[0] = 0;
+    }
     dc_measurements[irq_cnt++ % 10] = ADC_Value;
 }
 
 void TIMERA0_0_IRQHandler(void) {
+    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;
     static uint32_t irq_cnt = 0;
     if (irq_cnt++ == 200) {
         max_per_cycle = peak;
@@ -81,8 +96,14 @@ void TIMERA0_0_IRQHandler(void) {
 }
 
 void TIMERA1_0_IRQHandler(void) {
+    TIMER_A1->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;
     static uint32_t irq_cnt = 0;
     ac_measurements[irq_cnt++ % 10] = ADC_Value;
+}
+
+void TIMERA2_0_IRQHandler(void) {
+    TIMER_A2->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;
+    ms_cnt++;
 }
 
 float Read_AC_PP(void) {
@@ -99,6 +120,14 @@ float Read_AC_RMS(void) {
     }
     rms_total /= 10;
     rms_val = (3.3 * rms_total) / ADC_RES;
+    return rms_val;
+}
+
+uint32_t Read_Freq(void) {
+    float f = 1/(.001 * ms_cnt);
+    freq = (uint32_t)f;
+    ms_cnt = 0;
+    return freq;
 }
 
 float Read_DC(void) {
