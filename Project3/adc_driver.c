@@ -8,11 +8,15 @@
 #include "msp.h"
 #include "adc_driver.h"
 
-static volatile uint8_t ADC_PP_Flag;
+static volatile uint8_t Measurement_Flag;
+static volatile uint16_t ADC_Value;
 static volatile uint16_t peak = 0;
 static volatile uint16_t trough = 16384;
 static volatile uint16_t max_per_cycle;
 static volatile uint16_t min_per_cycle;
+static volatile uint16_t dc_measurements[10];
+static volatile uint16_t ac_measurements[10];
+static volatile uint32_t freq = 1;
 
 void Initialize_ADC(void) {
     CS->KEY = CS_KEY_VAL;   // Unlock clock registers
@@ -39,35 +43,81 @@ void Initialize_ADC(void) {
     ADC14->CTL0 |= ADC14_CTL0_ENC |       //Enable conversion again
                    ADC14_CTL0_SC;         //Enable sampling
 
-    ADC_PP_Flag = ADC_UNAVAILABLE;
+    Measurement_Flag = MEASUREMENT_UNAVAILABLE;
+
+    TIMER_A0->CCR[0] = 65535;
+    TIMER_A0->CCTL[0] = TIMER_A_CCTLN_CCIE;
+    NVIC->ISER[0] = (1 << (TA0_0_IRQn & 0x1F));
+
+    TIMER_A1->CCR[0] = 1200;
+    TIMER_A1->CCTL[0] = TIMER_A_CCTLN_CCIE;
+    NVIC->ISER[0] = (1 << (TA1_0_IRQn & 0x1F));
 
 }
 
 void ADC14_IRQHandler(void) {
-    static volatile irq_cnt = 0;
+    static volatile uint32_t irq_cnt = 0;
     ADC14->CLRIFGR0 |= ADC14_CLRIFGR0_CLRIFG0;
     ADC_Value = ADC14->MEM[0];
-    if (irq_cnt == 2000) {
-        max_per_cycle = peak;
-        min_per_cycle = trough;
-        peak = 0;
-        trough = 16384;
-        irq_cnt = 0;
-    }
     if (ADC_Value > peak) {
         peak = ADC_Value;
     }
     else if (ADC_Value < trough) {
         trough = ADC_Value;
     }
-    irq_cnt++;
+    dc_measurements[irq_cnt++ % 10] = ADC_Value;
 }
 
-int Read_Peak(void) {
-    if (ADC_PP_Flag) {
-        ADC_PP_Flag = ADC_UNAVAILABLE;
-        return
+void TIMERA0_0_IRQHandler(void) {
+    static uint32_t irq_cnt = 0;
+    if (irq_cnt++ == 200) {
+        max_per_cycle = peak;
+        min_per_cycle = trough;
+        peak = 0;
+        trough = 16384;
+        Measurement_Flag = MEASUREMENT_READY;
+        irq_cnt = 0;
     }
-    return ADC_PP_Flag;
+}
+
+void TIMERA1_0_IRQHandler(void) {
+    static uint32_t irq_cnt = 0;
+    ac_measurements[irq_cnt++ % 10] = ADC_Value;
+}
+
+float Read_AC_PP(void) {
+    float pp_val = (3.3 * (max_per_cycle - min_per_cycle)) / ADC_RES;
+    return pp_val;
+}
+
+float Read_AC_RMS(void) {
+    float rms_val = 0;
+    uint64_t rms_total = 0;
+    int i;
+    for (i = 0; i < 10; i++) {
+        rms_total += (ac_measurements[i] * ac_measurements[i]);
+    }
+    rms_total /= 10;
+    rms_val = (3.3 * rms_total) / ADC_RES;
+}
+
+float Read_DC(void) {
+    uint32_t dc_total;
+    int i;
+    for (i = 0; i < 10; i++) {
+        dc_total += dc_measurements[i];
+    }
+    dc_total /= 10;
+    return (3.3 * dc_total) / ADC_RES;
+}
+
+uint8_t Read_Measurement_Flag(void) {
+    if (Measurement_Flag) {
+        Measurement_Flag = MEASUREMENT_UNAVAILABLE;
+        return MEASUREMENT_READY;
+    }
+    else {
+        return MEASUREMENT_UNAVAILABLE;
+    }
 }
 
