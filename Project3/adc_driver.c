@@ -40,7 +40,6 @@ void Initialize_ADC(void) {
     ADCPORT->SEL0 |= ADCPIN;             //Initialize port to accept input
     ADCPORT->SEL1 |= ADCPIN;
     NVIC->ISER[0] = 1 << (ADC14_IRQn & 0x1F);
-    __enable_irq();
     ADC14->CTL0 |= ADC14_CTL0_ENC |       //Enable conversion again
                    ADC14_CTL0_SC;         //Enable sampling
 
@@ -50,7 +49,7 @@ void Initialize_ADC(void) {
     TIMER_A0->CCTL[0] = TIMER_A_CCTLN_CCIE;
     TIMER_A0->CTL = TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1;
     NVIC->ISER[0] = (1 << (TA0_0_IRQn & 0x1F));
-
+/*
     TIMER_A1->CCR[0] = 1200;
     TIMER_A1->CCTL[0] = TIMER_A_CCTLN_CCIE;
     TIMER_A1->CTL = TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1;
@@ -60,7 +59,7 @@ void Initialize_ADC(void) {
     TIMER_A2->CCTL[0] = TIMER_A_CCTLN_CCIE;
     TIMER_A2->CTL = TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1;
     NVIC->ISER[0] = (1 << (TA2_0_IRQn & 0x1F));
-
+*/
 }
 
 void ADC14_IRQHandler(void) {
@@ -78,11 +77,13 @@ void ADC14_IRQHandler(void) {
     }
     else if ((ADC_Value & 0x3FF8) == (trough & 0x3FF8)) {
         TIMER_A2->CCR[0] = 0;
+        freq - 1000/ms_cnt;
+        ms_cnt = 0;
     }
     dc_measurements[irq_cnt++ % 10] = ADC_Value;
 }
 
-void TIMERA0_0_IRQHandler(void) {
+void TA0_0_IRQHandler(void) {
     TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;
     static uint32_t irq_cnt = 0;
     if (irq_cnt++ == 200) {
@@ -95,13 +96,13 @@ void TIMERA0_0_IRQHandler(void) {
     }
 }
 
-void TIMERA1_0_IRQHandler(void) {
+void TA1_0_IRQHandler(void) {
     TIMER_A1->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;
     static uint32_t irq_cnt = 0;
     ac_measurements[irq_cnt++ % 10] = ADC_Value;
 }
 
-void TIMERA2_0_IRQHandler(void) {
+void TA2_0_IRQHandler(void) {
     TIMER_A2->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;
     ms_cnt++;
 }
@@ -124,9 +125,6 @@ float Read_AC_RMS(void) {
 }
 
 uint32_t Read_Freq(void) {
-    float f = 1/(.001 * ms_cnt);
-    freq = (uint32_t)f;
-    ms_cnt = 0;
     return freq;
 }
 
