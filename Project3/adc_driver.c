@@ -17,14 +17,16 @@ static volatile uint16_t trough = 16384;
 static volatile uint16_t max_per_cycle;
 static volatile uint16_t min_per_cycle;
 static volatile uint16_t dc_measurements[10];
-static volatile uint16_t ac_measurements[10];
+static volatile uint16_t ac_measurements[20];
 static volatile uint32_t freq = 1;
+static volatile uint32_t sampling_rate = 1;
 
 void Initialize_ADC(void) {
     CS->KEY = CS_KEY_VAL;   // Unlock clock registers
 
     CS->CTL1 &= ~(CS_CTL1_DIVHS_MASK | CS_CTL1_DIVS_MASK | CS_CTL1_SELS_MASK | CS_CTL1_DIVA_MASK | CS_CTL1_SELA_MASK); // Clear CS registers
     CS->CTL1 |= CS_CTL1_DIVHS_0 | CS_CTL1_DIVS_0 | CS_CTL1_SELS_3 | CS_CTL1_DIVA_0 | CS_CTL1_SELA__REFOCLK; // Set DCO to drive HSCLK and SMCLK
+    CS->CLKEN |= CS_CLKEN_REFOFSEL;
 
     CS->KEY = 0; // Lock clock registers
 
@@ -51,7 +53,7 @@ void Initialize_ADC(void) {
     TIMER_A0->CTL = TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1;
     NVIC->ISER[0] = (1 << (TA0_0_IRQn & 0x1F));
 
-    TIMER_A1->CCR[0] = 1200;
+    TIMER_A1->CCR[0] = 600;
     TIMER_A1->CCTL[0] = TIMER_A_CCTLN_CCIE;
     TIMER_A1->CTL = TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_1;
     NVIC->ISER[0] = (1 << (TA1_0_IRQn & 0x1F));
@@ -68,9 +70,10 @@ void Initialize_ADC(void) {
     TIMER_A2->CCTL[1] = TIMER_A_CCTLN_CCIE |
                         TIMER_A_CCTLN_CM_2 |
                         TIMER_A_CCTLN_CCIS_0 |
+                        TIMER_A_CCTLN_SCS |
                         TIMER_A_CCTLN_CAP;
-
-    TIMER_A2->CTL = TIMER_A_CTL_TASSEL_1;
+    TIMER_A2->CTL = TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_MC_2 | TIMER_A_CTL_ID__8;
+    TIMER_A2->EX0 = TIMER_A_EX0_IDEX__8;
     NVIC->ISER[0] = (1 << (TA2_N_IRQn & 0x1F));
 }
 
@@ -94,7 +97,14 @@ void TA0_0_IRQHandler(void) {
         __disable_irq();
         max_per_cycle = peak;
         min_per_cycle = trough;
-        freq = 1000/ms_cnt;
+        freq = 187500/ms_cnt;
+        if (freq == 0) {
+            freq = 1;
+        }
+        sampling_rate = 1000/freq;
+        if (sampling_rate == 0) {
+            sampling_rate = 1;
+        }
         peak = 0;
         trough = 16384;
         Measurement_Flag = MEASUREMENT_READY;
@@ -103,23 +113,32 @@ void TA0_0_IRQHandler(void) {
 }
 
 void TA1_0_IRQHandler(void) {
-    TIMER_A1->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;
+    static uint32_t sample_num = 0;
     static uint32_t irq_cnt = 0;
-    ac_measurements[irq_cnt++ % 10] = ADC_Value;
+    TIMER_A1->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;
+    if (++sample_num == sampling_rate) {
+        ac_measurements[irq_cnt % 20] = ADC_Value;
+        irq_cnt++;
+        sample_num = 0;
+    }
 }
 
 void TA2_N_IRQHandler(void) {
-    static uint32_t last_cap = 0;
+    static volatile uint32_t last_cap = 0;
+    static volatile uint32_t current_cap = 0;
+    static volatile uint32_t overflow_cnt = 0;
     TIMER_A2->CCTL[1] &= ~TIMER_A_CCTLN_CCIFG;
-    uint32_t current_cap = TIMER_A2->CCR[1];
     if (TIMER_A2->CCTL[1] & TIMER_A_CCTLN_COV) {
-        ms_cnt = ((current_cap + 65525) - last_cap) / 128;
         TIMER_A2->CCTL[1] &= ~TIMER_A_CCTLN_COV;
+        overflow_cnt++;
     }
     else {
-        ms_cnt = (current_cap - last_cap) / 128;
+        current_cap = TIMER_A2->CCR[1];
+        ms_cnt = ((current_cap + (65525 * overflow_cnt)) - last_cap);
+        last_cap = current_cap;
+        overflow_cnt = 0;
+        TIMER_A2->CCTL[1] &= ~TIMER_A_CCTLN_COV;
     }
-    last_cap = current_cap;
 }
 
 float Read_AC_PP(void) {
@@ -131,10 +150,10 @@ float Read_AC_RMS(void) {
     float rms_val = 0;
     uint64_t rms_total = 0;
     int i;
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < 20; i ++) {
         rms_total += (ac_measurements[i] * ac_measurements[i]);
     }
-    rms_total /= 10;
+    rms_total /= 20;
     rms_total = sqrt(rms_total);
     rms_val = .000198 * rms_total - .00477;
     return rms_val;
