@@ -11,7 +11,7 @@
 static volatile int input_flag = INPUT_UNAVAILABLE;
 static volatile uint8_t inValue[4];
 
-void EUSCIA0_IRQHandler(void) {
+/*void EUSCIA0_IRQHandler(void) {
     static volatile int char_index = 0;
     EUSCI_A0->IFG &= ~EUSCI_A_IFG_RXIFG;
     unsigned char rx_char = EUSCI_A0->RXBUF;
@@ -100,7 +100,7 @@ uint16_t GetInputValue(void) {
     }
     input_flag = INPUT_UNAVAILABLE;
     return input;
-}
+}*/
 
 void Initialize_UART(void)
 {
@@ -130,7 +130,667 @@ void Initialize_UART(void)
 
     EUSCI_A0->CTLW0 &= ~EUSCI_A_CTLW0_SWRST;
 
-    EUSCI_A0->IE |= EUSCI_A_IE_RXIE;
-    NVIC->ISER[0] = (1 << (EUSCIA0_IRQn & 0x1F));
+    //EUSCI_A0->IE |= EUSCI_A_IE_RXIE;
+    //NVIC->ISER[0] = (1 << (EUSCIA0_IRQn & 0x1F));
 
+    Init_Desc_Values_To_VT100();
+}
+
+void Write_Desc_Values_To_VT100(void)
+{
+    float val = 1.0;
+    uint32_t i;
+    uint32_t temp = 0;
+    uint32_t Vpp = 0;
+    uint32_t ones = 0;
+    uint32_t tens = 0;
+    uint32_t hundreds = 0;
+
+    // Return to Top left corner
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '3';                        //8 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '9';                        //8 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'A';                        //Up
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '8';                        //8 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '8';                        //8 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //Reset cursor to AC RMS
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '7';                        //7 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'C';                        //right
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //Write Value Here in the format x.xx
+    temp = (Read_AC_RMS() * 100);
+    hundreds = ((temp - (temp % 100)) / 100 ) + ZERO;
+    EUSCI_A0->TXBUF = hundreds;                       //New-line
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '.';                            //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    tens = (val * 100 - (hundreds-ZERO) * 100)/10 + ZERO;
+    EUSCI_A0->TXBUF = tens;                            //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    ones = ((val * 100) - (hundreds - ZERO)*100 - (tens - ZERO)*10) + ZERO;
+    EUSCI_A0->TXBUF = ones;                           //4 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //Reset cursor to AC RMS Bar
+    EUSCI_A0->TXBUF = 0x0A;                       //New-line
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '4';                        //4 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    EUSCI_A0->TXBUF = 178;                        //0th bar
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    //Write number of bars as RMS
+    for(i = 0; i < 33*(temp/3.3); i++)
+    {
+        EUSCI_A0->TXBUF = 178;                        //New-line
+        while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    }
+    for(i = 0; i < 33-(33*(temp/3.3)); i++)
+    {
+        EUSCI_A0->TXBUF = ' ';                        //New-line
+        while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    }
+
+    //Reset cursor to AC Vpp
+    EUSCI_A0->TXBUF = 0x0A;                       //New-line
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x0A;                       //New-line (down two lines to vpp)
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '5';                        //Reset cursor to very left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '0';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '7';                        //Reset cursor to start of Vpp (8 right)
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'C';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //Write Value Here in the format x.xx
+    temp = (Read_AC_PP() * 100);
+    hundreds = ((temp - (temp % 100)) / 100 ) + ZERO;
+    EUSCI_A0->TXBUF = hundreds;                       //New-line
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '.';                            //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    tens = (val * 100 - (hundreds-ZERO) * 100)/10 + ZERO;
+    EUSCI_A0->TXBUF = tens;                            //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    ones = ((val * 100) - (hundreds - ZERO)*100 - (tens - ZERO)*10) + ZERO;
+    EUSCI_A0->TXBUF = ones;                           //4 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //Go down to AC Frq
+    EUSCI_A0->TXBUF = 0x0A;                       //New-line (down one line to AC Frq)
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '3';                        //Reset cursor to very left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '0';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '7';                        //Reset cursor to start of Vpp (8 right)
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'C';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //Write Value Here in the format x.xx
+    temp = (Read_Freq() * 100);
+    hundreds = ((temp - (temp % 100)) / 100 ) + ZERO;
+    EUSCI_A0->TXBUF = hundreds;                       //New-line
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '.';                            //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    tens = (val * 100 - (hundreds-ZERO) * 100)/10 + ZERO;
+    EUSCI_A0->TXBUF = tens;                            //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    ones = ((val * 100) - (hundreds - ZERO)*100 - (tens - ZERO)*10) + ZERO;
+    EUSCI_A0->TXBUF = ones;                           //4 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //Go down to DC Val
+    EUSCI_A0->TXBUF = 0x0A;                       //New-line (down one line to DCV)
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '3';                        //Reset cursor to very left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '0';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '7';                        //Reset cursor to start of Vpp (8 right)
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'C';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //Write Value Here in the format x.xx
+    temp = (Read_DC() * 100);
+    hundreds = ((temp - (temp % 100)) / 100 ) + ZERO;
+    EUSCI_A0->TXBUF = hundreds;                       //New-line
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '.';                            //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    tens = (val * 100 - (hundreds-ZERO) * 100)/10 + ZERO;
+    EUSCI_A0->TXBUF = tens;                            //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    ones = ((val * 100) - (hundreds - ZERO)*100 - (tens - ZERO)*10) + ZERO;
+    EUSCI_A0->TXBUF = ones;                           //4 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //Go down to DC Bar
+    EUSCI_A0->TXBUF = 0x0A;                       //New-line (down one line to DC Bar)
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '3';                        //Reset cursor to very left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '0';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '7';                        //Reset cursor to start of Vpp (8 right)
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'C';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //Write number of bars as RMS
+    EUSCI_A0->TXBUF = 178;                        //0th bar
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    //Write number of bars as RMS
+    for(i = 0; i < 33*(temp/3.3); i++)
+    {
+        EUSCI_A0->TXBUF = 178;                        //New-line
+        while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    }
+    for(i = 0; i < 33-(33*(temp/3.3)); i++)
+    {
+        EUSCI_A0->TXBUF = ' ';                        //New-line
+        while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    }
+
+    // Return to Top left corner
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '3';                        //8 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '9';                        //8 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'A';                        //Up
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '8';                        //8 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '8';                        //8 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+}
+
+/*
+ * Initiates the displaying of the following values
+ * AC RMS (True RMS including DC offset)
+ * AC RMS bar graph
+ * AC RMS bar graph scale
+ * AC VPP
+ * AC Frq
+ * DC Vol
+ * DC Vol bar graph
+ * DC Vol bar graph scale
+ */
+void Init_Desc_Values_To_VT100(void)
+{
+    //AC RMS
+    EUSCI_A0->TXBUF = 'A';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'C';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ' ';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'R';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'M';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'S';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ':';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ' ';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x0A;                       //New-line
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '8';                        //8 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //AC Bar graph
+    EUSCI_A0->TXBUF = 'A';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'C';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ' ';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'B';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'A';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'R';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ':';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ' ';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x0A;                       //New-line
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '8';                        //6 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //AC Bar scale
+    EUSCI_A0->TXBUF = 'A';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'C';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ' ';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'S';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'C';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'L';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ':';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '0';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '1';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '2';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '3';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '3';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '.';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '3';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x0A;                       //New-line
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '4';                        //43 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '3';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //AC Vpp
+    EUSCI_A0->TXBUF = 'A';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'C';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ' ';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'V';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'p';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'p';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ':';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ' ';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x0A;                       //New-line
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '8';                        //6 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //AC Frequency
+    EUSCI_A0->TXBUF = 'A';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'C';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ' ';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'F';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'R';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'Q';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ':';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ' ';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x0A;                       //New-line
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '8';                        //6 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //DC Voltage
+    EUSCI_A0->TXBUF = 'D';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'C';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ' ';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'V';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'O';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'L';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ':';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ' ';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x0A;                       //New-line
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '8';                        //6 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //DC Bar
+    EUSCI_A0->TXBUF = 'D';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'C';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ' ';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'B';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'A';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'R';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ':';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ' ';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x0A;                       //New-line
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '8';                        //6 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    //DC Scale
+    EUSCI_A0->TXBUF = 'D';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'C';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ' ';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'S';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'C';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'L';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = ':';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '0';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '1';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '2';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '3';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '|';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '3';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '.';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '3';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x0A;                       //New-line
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '4';                        //43 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '3';
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    // Return to Top left corner
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '3';                        //8 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '9';                        //8 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'A';                        //Up
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+
+    EUSCI_A0->TXBUF = 0x1B;                       //Esc
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '[';                        //[
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '8';                        //8 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = '8';                        //8 position
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    EUSCI_A0->TXBUF = 'D';                        //left
+    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
 }

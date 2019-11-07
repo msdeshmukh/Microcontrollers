@@ -21,11 +21,8 @@ void main(void)
     __enable_irq();
 	while(1) {
 	    if (Read_Measurement_Flag()) {
-	        dc = Read_DC();
 	        Send_DAC_Voltage(Read_Center());
-	        ac_pp = Read_AC_PP();
-	        ac_rms = Read_AC_RMS();
-	        frequency = Read_Freq();
+	        Write_Desc_Values_To_VT100();
 	        __enable_irq();
 	    }
 	}

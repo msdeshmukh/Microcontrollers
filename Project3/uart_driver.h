@@ -33,6 +33,8 @@
 #define NEW_LINE 10
 #define RETURN 13
 
+void Write_Desc_Values_To_VT100(void);
+void Init_Desc_Values_To_VT100(void);
 void EUSCIA0_IRQHandler(void);
 void Initialize_UART(void);
 void Send_Serial_Char(unsigned char c);
