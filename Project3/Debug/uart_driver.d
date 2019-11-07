@@ -18,6 +18,7 @@ uart_driver.obj: C:/ti/ccs910/ccs/ccs_base/arm/include/CMSIS/cmsis_compiler.h
 uart_driver.obj: C:/ti/ccs910/ccs/ccs_base/arm/include/CMSIS/cmsis_ccs.h
 uart_driver.obj: C:/ti/ccs910/ccs/ccs_base/arm/include/system_msp432p401r.h
 uart_driver.obj: ../uart_driver.h
+uart_driver.obj: ../adc_driver.h
 
 ../uart_driver.c: 
 C:/ti/ccs910/ccs/ccs_base/arm/include/msp.h: 
@@ -37,3 +38,4 @@ C:/ti/ccs910/ccs/ccs_base/arm/include/CMSIS/cmsis_compiler.h:
 C:/ti/ccs910/ccs/ccs_base/arm/include/CMSIS/cmsis_ccs.h: 
 C:/ti/ccs910/ccs/ccs_base/arm/include/system_msp432p401r.h: 
 ../uart_driver.h: 
+../adc_driver.h: 

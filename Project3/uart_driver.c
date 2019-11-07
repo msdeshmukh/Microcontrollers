@@ -7,6 +7,7 @@
 
 #include "msp.h"
 #include "uart_driver.h"
+#include "adc_driver.h"
 
 static volatile int input_flag = INPUT_UNAVAILABLE;
 static volatile uint8_t inValue[4];
@@ -180,7 +181,8 @@ void Write_Desc_Values_To_VT100(void)
     while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
 
     //Write Value Here in the format x.xx
-    temp = (Read_AC_RMS() * 100);
+    val = Read_AC_RMS();
+    temp = (int)(val * 100);
     hundreds = ((temp - (temp % 100)) / 100 ) + ZERO;
     EUSCI_A0->TXBUF = hundreds;                       //New-line
     while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
@@ -205,15 +207,13 @@ void Write_Desc_Values_To_VT100(void)
     EUSCI_A0->TXBUF = 'D';                        //left
     while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
 
-    EUSCI_A0->TXBUF = 178;                        //0th bar
-    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
     //Write number of bars as RMS
-    for(i = 0; i < 33*(temp/3.3); i++)
+    for(i = 0; i < 33*(val/3.3); i++)
     {
         EUSCI_A0->TXBUF = 178;                        //New-line
         while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
     }
-    for(i = 0; i < 33-(33*(temp/3.3)); i++)
+    for(i = 0; i < 33-(33*(val/3.3)); i++)
     {
         EUSCI_A0->TXBUF = ' ';                        //New-line
         while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
@@ -244,7 +244,8 @@ void Write_Desc_Values_To_VT100(void)
     while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
 
     //Write Value Here in the format x.xx
-    temp = (Read_AC_PP() * 100);
+    val = Read_AC_PP();
+    temp = (int)(val * 100);
     hundreds = ((temp - (temp % 100)) / 100 ) + ZERO;
     EUSCI_A0->TXBUF = hundreds;                       //New-line
     while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
@@ -280,18 +281,41 @@ void Write_Desc_Values_To_VT100(void)
     while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
 
     //Write Value Here in the format x.xx
-    temp = (Read_Freq() * 100);
-    hundreds = ((temp - (temp % 100)) / 100 ) + ZERO;
-    EUSCI_A0->TXBUF = hundreds;                       //New-line
-    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
-    EUSCI_A0->TXBUF = '.';                            //Esc
-    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
-    tens = (val * 100 - (hundreds-ZERO) * 100)/10 + ZERO;
-    EUSCI_A0->TXBUF = tens;                            //[
-    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
-    ones = ((val * 100) - (hundreds - ZERO)*100 - (tens - ZERO)*10) + ZERO;
-    EUSCI_A0->TXBUF = ones;                           //4 position
-    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    temp = Read_Freq();
+    if(temp == 1000)
+    {
+        EUSCI_A0->TXBUF = '1';                       //New-line
+        while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+        EUSCI_A0->TXBUF = '0';                            //Esc
+        while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+        EUSCI_A0->TXBUF = '0';                            //[
+        while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+        EUSCI_A0->TXBUF = '0';                           //4 position
+        while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    }
+    else if(temp < 1000 && temp >= 100)
+    {
+        hundreds = temp/100;
+        EUSCI_A0->TXBUF = hundreds + ZERO;
+        while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+        tens = (temp - hundreds*100)/10;
+        EUSCI_A0->TXBUF = tens + ZERO;
+        while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+        EUSCI_A0->TXBUF = temp - hundreds*100 - tens*10 + ZERO;
+        while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    }
+    else if(temp < 100 && temp >= 10)
+    {
+        EUSCI_A0->TXBUF = ZERO + temp/10;
+        while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+        EUSCI_A0->TXBUF = ZERO + (temp - (temp/10)*10);
+        while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    }
+    else
+    {
+        EUSCI_A0->TXBUF = ZERO + temp;
+        while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
+    }
 
     //Go down to DC Val
     EUSCI_A0->TXBUF = 0x0A;                       //New-line (down one line to DCV)
@@ -316,7 +340,8 @@ void Write_Desc_Values_To_VT100(void)
     while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
 
     //Write Value Here in the format x.xx
-    temp = (Read_DC() * 100);
+    val = Read_DC();
+    temp = (int)(val * 100);
     hundreds = ((temp - (temp % 100)) / 100 ) + ZERO;
     EUSCI_A0->TXBUF = hundreds;                       //New-line
     while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
@@ -352,15 +377,12 @@ void Write_Desc_Values_To_VT100(void)
     while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
 
     //Write number of bars as RMS
-    EUSCI_A0->TXBUF = 178;                        //0th bar
-    while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
-    //Write number of bars as RMS
-    for(i = 0; i < 33*(temp/3.3); i++)
+    for(i = 0; i < 33*(val/3.3); i++)
     {
         EUSCI_A0->TXBUF = 178;                        //New-line
         while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
     }
-    for(i = 0; i < 33-(33*(temp/3.3)); i++)
+    for(i = 0; i < 33-(33*(val/3.3)); i++)
     {
         EUSCI_A0->TXBUF = ' ';                        //New-line
         while(!(EUSCI_A0->IFG & EUSCI_A_IFG_TXIFG));
