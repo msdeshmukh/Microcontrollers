@@ -8,9 +8,9 @@
 #ifndef I2C_DRIVER_H_
 #define I2C_DRIVER_H_
 
-#define I2C_PORT P1
-#define SDA BIT6
-#define SCL BIT7
+#define I2C_PORT P6
+#define SDA BIT4
+#define SCL BIT5
 #define RW_BIT BIT1
 #define EEPROM_SIZE 32767
 
