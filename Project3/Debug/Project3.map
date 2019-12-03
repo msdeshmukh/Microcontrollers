@@ -1,7 +1,7 @@
 ******************************************************************************
-                  TI ARM Linker PC v18.12.2                    
+                  TI ARM Linker PC v18.12.3                    
 ******************************************************************************
->> Linked Wed Nov  6 20:17:02 2019
+>> Linked Sun Dec  1 20:08:04 2019
 
 OUTPUT FILE NAME:   <Project3.out>
 ENTRY POINT SYMBOL: "_c_int00_noargs"  address: 00002981
@@ -115,7 +115,7 @@ MODULE SUMMARY
     +--+-----------------------------+-------+---------+---------+
        Total:                        8130    228       232    
                                                               
-    C:\ti\ccs910\ccs\tools\compiler\ti-cgt-arm_18.12.2.LTS\lib\rtsv7M4_T_le_v4SPD16_eabi.lib
+    C:\ti\ccs920\ccs\tools\compiler\ti-cgt-arm_18.12.3.LTS\lib\rtsv7M4_T_le_v4SPD16_eabi.lib
        fd_add_t2.asm.obj             438     0         0      
        e_sqrt.c.obj                  344     0         0      
        fd_div_t2.asm.obj             310     0         0      
