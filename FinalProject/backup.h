@@ -22,11 +22,14 @@
 #define US_MIN_DIST 4.0f
 #define GEAR_REVERSE 0x01
 #define GEAR_DRIVE 0x00
-#define TWO_Hz_TOGGLE 6000000
+#define TWO_Hz_TOGGLE 400
+#define GEAR_SELECT_PORT P2
+#define GEAR_SELECTOR BIT5
 
 void Initialize_Backup(void);
 float Measure_Distance(void);
 void Set_Beep_Freq(uint32_t toggle_freq);
 void TA2_N_IRQHandler(void);
+void Change_Gears(uint8_t gear_select);
 
 #endif /* BACKUP_H_ */
