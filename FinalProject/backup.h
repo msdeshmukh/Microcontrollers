@@ -8,6 +8,8 @@
 #ifndef BACKUP_H_
 #define BACKUP_H_
 
+#include "msp.h"
+
 #define BACKUP_PORT P5
 #define US_TRIG BIT1
 #define US_ECHO BIT6
@@ -20,7 +22,7 @@
 #define US_MIN_DIST 4.0f
 #define GEAR_REVERSE 0x01
 #define GEAR_DRIVE 0x00
-#define 2Hz_TOGGLE 6000000
+#define TWO_Hz_TOGGLE 6000000
 
 void Initialize_Backup(void);
 float Measure_Distance(void);

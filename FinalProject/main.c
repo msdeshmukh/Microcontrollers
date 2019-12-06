@@ -16,6 +16,6 @@ void main(void)
 	__enable_irq();
 	while(1) {
 	    distance = Measure_Distance();
-	    Set_Beep_Freq(2Hz_TOGGLE * ((1.0 * distance) / US_MAX_DIST));
+	    Set_Beep_Freq(TWO_Hz_TOGGLE * ((1.0 * distance) / US_MAX_DIST));
 	}
 }

@@ -43,8 +43,8 @@ void TA0_0_IRQHandler(void) {
 }
 
 void Initialize_Backup(void) {
-    beep_freq = 2Hz_TOGGLE;
-
+    beep_freq = TWO_Hz_TOGGLE;
+    gear = GEAR_REVERSE;
     BACKUP_PORT->DIR |= BUZZER | US_TRIG;
     BACKUP_PORT->DIR &= ~US_ECHO;
     BACKUP_PORT->SEL0 &= ~(BUZZER | US_TRIG);
@@ -70,7 +70,7 @@ void Initialize_Backup(void) {
     TIMER_A0->CCTL[0] = TIMER_A_CCTLN_CCIE;
     TIMER_A0->CTL = TIMER_A_CTL_MC_1 | TIMER_A_CTL_TASSEL_2;
     TIMER_A0->CCR[0] = 65535;
-    NVIC->ISER[0] = (1 << (TA0_N_IRQn & 0x1f));
+    NVIC->ISER[0] = (1 << (TA0_0_IRQn & 0x1f));
 
 
 }
