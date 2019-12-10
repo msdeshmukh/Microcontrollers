@@ -14,24 +14,30 @@ static volatile uint8_t high_bool;
 static volatile uint8_t gear;
 static volatile uint32_t beep_freq;
 
+// TimerA2.1 set up to capture ultrasonic echo pulse
 void TA2_N_IRQHandler(void) {
     TIMER_A2->CCTL[1] &= ~TIMER_A_CCTLN_CCIFG;
+    // Check timer overflow
     if (TIMER_A2->CCTL[1] & TIMER_A_CCTLN_COV && !high_bool) {
         t_echo_low += 65535;
         TIMER_A2->CCTL[1] &= ~TIMER_A_CCTLN_COV;
     }
+    // start measuring pulse on first rising edge
     else if (TIMER_A2->CCTL[1] & TIMER_A_CCTLN_CCI && high_bool) {
         t_echo_high = TIMER_A2->CCR[1];
         high_bool = FALSE;
     }
+    // stop measuring pulse on falling edge
     else if (!(TIMER_A2->CCTL[1] & TIMER_A_CCTLN_CCI) && !high_bool) {
         t_echo_low += TIMER_A2->CCR[1];
     }
 }
 
+// TimerA0.0 set up to periodically trigger buzzer
 void TA0_0_IRQHandler(void) {
     static uint32_t irq_cnt = 0;
     TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;
+    // toggle buzzer when in reverse
     if (gear == GEAR_REVERSE && irq_cnt++ >= beep_freq) {
         BACKUP_PORT->OUT ^= BUZZER;
         irq_cnt = 0;
@@ -42,6 +48,8 @@ void TA0_0_IRQHandler(void) {
     }
 }
 
+// Initialize all peripherals
+// TimerA2.1 used for ultrasonic measurements
 void Initialize_Backup(void) {
     beep_freq = TWO_Hz_TOGGLE;
     BACKUP_PORT->DIR |= BUZZER | US_TRIG;
@@ -78,19 +86,25 @@ void Initialize_Backup(void) {
 
 }
 
+// Abstraction function to alter buzzer toggle frequency
 void Set_Beep_Freq(uint32_t toggle_freq) {
     beep_freq = toggle_freq;
 }
 
+// Function to trigger ultrasonic sensor and begin distance measurement
 float Measure_Distance(void) {
     float distance = 0;
     t_echo_high = 0;
     t_echo_low = 0;
     high_bool = TRUE;
+    // Send ultrasonic sensor a high signal for 30uS
     BACKUP_PORT->OUT &= ~US_TRIG;
     delay_us(30);
+    // Turn off trigger signal to begin measurement
     BACKUP_PORT->OUT |= US_TRIG;
+    // Wait at least 60mS for ultrasonic measurement to take place
     delay_us(60000);
+    // Adjust distance measurement using calibration function
     distance = (((t_echo_low - t_echo_high) / US_TIME_SCALE) * 34300) / 2.0;
     if (distance > US_MAX_DIST || distance < 0) {
         distance = US_MAX_DIST;
@@ -101,6 +115,7 @@ float Measure_Distance(void) {
     return distance;
 }
 
+// Abstraction function to change gears
 void Change_Gears(uint8_t gear_select) {
     gear = gear_select;
 }

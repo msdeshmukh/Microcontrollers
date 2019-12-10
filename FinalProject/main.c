@@ -16,20 +16,26 @@ void main(void)
 {
 	WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;		// stop watchdog timer
 	set_DCO(DCORSEL_12_MHz);
+	// Initialize amplifier, ultrasonic sensor, and debug terminal control
 	Initialize_Backup();
 	Initialize_UART();
 	uint32_t distance;
 	__enable_irq();
 	while(1) {
+	    // Check if car is in reverse
 	    if (!(GEAR_SELECT_PORT->IN & GEAR_SELECTOR)) {
+	        // turn off alarm if in driver
+	        BACKUP_PORT->OUT &= ~BUZZER;
 	        Change_Gears(GEAR_DRIVE);
 	    }
 	    else {
-	        BACKUP_PORT->OUT &= ~BUZZER;
 	        Change_Gears(GEAR_REVERSE);
 	    }
+	    // measure and adjust distance from ultrasonic
 	    distance = (uint32_t)Measure_Distance() / 2;
+	    // write distance to debug terminal
 	    Write_Distance(distance);
+	    // adjust alarm frequency based on distance
 	    Set_Beep_Freq(TWO_Hz_TOGGLE * ((1.0 * distance) / US_MAX_DIST));
 	}
 }
